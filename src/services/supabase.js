@@ -47,8 +47,6 @@ export const supabaseService = {
         },
         chat_messages: projectData.chat_messages,
         user_ip: projectData.user_ip,
-        user_agent: navigator.userAgent,
-        submitted_at: projectData.submitted_at,
         status: projectData.status || 'submitted'
       };
 
