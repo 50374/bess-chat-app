@@ -4,11 +4,53 @@ import cors from 'cors';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Manual CORS handler for troubleshooting
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log('🔍 Request from origin:', origin);
+  console.log('🔍 Request method:', req.method);
+  console.log('🔍 Request path:', req.path);
+  
+  if (origin) {
+    const allowedOrigins = [
+      'https://ainfragg.com', 
+      'https://www.ainfragg.com',
+      'https://extraordinary-monstera-e00408.netlify.app',
+      'https://development--extraordinary-monstera-e00408.netlify.app',
+      'https://melodic-zabaione-57cf44.netlify.app',
+      'http://localhost:5173', 
+      'http://localhost:5174'
+    ];
+    
+    const deployPreviewPattern = /^https:\/\/deploy-preview-\d+--extraordinary-monstera-e00408\.netlify\.app$/;
+    
+    if (allowedOrigins.includes(origin) || deployPreviewPattern.test(origin)) {
+      console.log('✅ Setting CORS headers for:', origin);
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+    }
+  }
+  
+  if (req.method === 'OPTIONS') {
+    console.log('🔧 Handling OPTIONS preflight');
+    return res.status(200).end();
+  }
+  
+  next();
+});
+
 // Middleware
 app.use(cors({
   origin: function (origin, callback) {
+    console.log('🌐 CORS origin check:', origin);
+    
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
+    if (!origin) {
+      console.log('✅ No origin - allowing');
+      return callback(null, true);
+    }
     
     const allowedOrigins = [
       'https://ainfragg.com', 
@@ -22,18 +64,25 @@ app.use(cors({
     
     // Check if origin is in allowed list
     if (allowedOrigins.includes(origin)) {
+      console.log('✅ Origin in allowed list:', origin);
       return callback(null, true);
     }
     
     // Check if origin matches Deploy Preview pattern
-    if (origin.match(/^https:\/\/deploy-preview-\d+--extraordinary-monstera-e00408\.netlify\.app$/)) {
+    const deployPreviewPattern = /^https:\/\/deploy-preview-\d+--extraordinary-monstera-e00408\.netlify\.app$/;
+    if (deployPreviewPattern.test(origin)) {
+      console.log('✅ Origin matches Deploy Preview pattern:', origin);
       return callback(null, true);
     }
     
     // Reject origin
+    console.log('❌ Origin rejected:', origin);
     callback(new Error('Not allowed by CORS'));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 }));
 app.use(express.json({ limit: '10mb' }));
 

@@ -124,8 +124,10 @@ function App() {
           alignItems: 'center',
           height: '100vh',
           overflow: 'auto',
-          paddingTop: '6vh',
-          paddingBottom: '2vh'
+          paddingTop: '4vh',
+          paddingBottom: '2vh',
+          paddingLeft: '20px',
+          paddingRight: '20px'
         }}>
           {/* Instruction/Title Box */}
           <div style={{
@@ -197,14 +199,14 @@ function App() {
         {/* Right side panel for BESS summary cards when available */}
         <div style={{ 
           flex: 1, 
-          padding: '6vh 20px 2vh 0',
+          padding: '4vh 20px 2vh 20px',
           display: 'flex',
           justifyContent: 'flex-start',
           alignItems: 'flex-start'
         }}>
           <div style={{
             width: '100%',
-            maxWidth: '450px',
+            maxWidth: '400px',
             height: 'calc(100vh - 8vh)',
             overflowY: 'auto',
             overflowX: 'hidden'

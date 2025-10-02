@@ -557,9 +557,10 @@ JSON SCHEMA:
                   maxWidth: '70%',
                   padding: '10px 16px',
                   borderRadius: 16,
-                  background: msg.role === 'user' ? 'linear-gradient(135deg, #6b7c6b, #4a5d4a)' : 'rgba(255, 255, 255, 0.8)',
-                  color: msg.role === 'user' ? '#fff' : '#000000',
-                  boxShadow: msg.role === 'user' ? '0 2px 8px rgba(75,93,75,0.3)' : '0 2px 8px rgba(0,0,0,0.1)',
+                  background: msg.role === 'user' ? 'rgba(107, 124, 107, 0.2)' : 'rgba(255, 255, 255, 0.8)',
+                  color: msg.role === 'user' ? '#000000' : '#000000',
+                  border: msg.role === 'user' ? '1px solid rgba(107, 124, 107, 0.4)' : '1px solid rgba(229, 231, 235, 0.3)',
+                  boxShadow: msg.role === 'user' ? '0 2px 8px rgba(107,124,107,0.2)' : '0 2px 8px rgba(0,0,0,0.1)',
                   fontSize: 16,
                   whiteSpace: 'pre-wrap',
                   wordBreak: 'break-word'
@@ -601,7 +602,7 @@ JSON SCHEMA:
           onClick={sendMessage}
           disabled={loading || !input.trim()}
           style={{
-            background: loading || !input.trim() ? '#a3b3a3' : 'linear-gradient(135deg, #6b7c6b, #4a5d4a)',
+            background: loading || !input.trim() ? '#a3b3a3' : 'rgba(107, 124, 107, 0.8)',
             color: loading || !input.trim() ? 'rgba(255,255,255,0.6)' : '#fff',
             border: 'none',
             borderRadius: 8,
