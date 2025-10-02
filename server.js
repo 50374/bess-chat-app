@@ -50,8 +50,7 @@ app.post('/api/chat', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        messages: messages.filter(msg => msg.role !== 'system'), // Remove system messages from array
-        system: messages.find(msg => msg.role === 'system')?.content || 'You are a helpful BESS specialist.'
+        messages: messages
       })
     });
 
