@@ -107,7 +107,9 @@ function App() {
       display: 'flex',
       flexDirection: 'row',
       width: '100vw',
-      overflow: 'hidden' // Prevent any page-level scrolling
+      overflow: 'hidden', // Prevent any page-level scrolling
+      // Add image optimization hints
+      imageRendering: 'optimizeSpeed'
     }}>
       {/* Left empty container for centering */}
       <div style={{ flex: 1 }} />
