@@ -339,12 +339,17 @@ JSON SCHEMA:
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+    await processMessage(input, messages);
+  };
+
+  // Helper function to process messages (can be called programmatically)
+  const processMessage = async (messageContent, currentMessages) => {
     setLoading(true);
     let newMessages;
     try {
-      newMessages = [...messages, { role: 'user', content: input }];
+      newMessages = [...currentMessages, { role: 'user', content: messageContent }];
       setMessages(newMessages);
-      setInput('');
+      setInput(''); // Clear input only if this was a user-initiated message
       
       // Notify parent about chat update
       if (onChatUpdate) {
@@ -381,14 +386,24 @@ JSON SCHEMA:
     }
   };
 
-  // Handle missing fields request from form
+  // Handle missing fields request from form OR automatic recommendation requests
   useEffect(() => {
-    if (requestMissingFields && requestMissingFields.length > 0) {
-      const missingFieldsText = requestMissingFields.join(', ');
-      const autoMessage = `I notice we're missing some important information for your BESS project. Could you please provide the ${missingFieldsText}? This will help me complete your specifications and enable the submit functionality.`;
-      
-      // Add the assistant message asking for missing fields
-      setMessages(prev => [...prev, { role: 'assistant', content: autoMessage }]);
+    if (requestMissingFields) {
+      if (Array.isArray(requestMissingFields) && requestMissingFields.length > 0) {
+        // Handle missing fields (original functionality)
+        const missingFieldsText = requestMissingFields.join(', ');
+        const autoMessage = `I notice we're missing some important information for your BESS project. Could you please provide the ${missingFieldsText}? This will help me complete your specifications and enable the submit functionality.`;
+        
+        // Add the assistant message asking for missing fields
+        setMessages(prev => [...prev, { role: 'assistant', content: autoMessage }]);
+        
+      } else if (typeof requestMissingFields === 'string') {
+        // Handle automatic recommendation request (new functionality)
+        console.log('🤖 Processing automatic recommendation request...');
+        
+        // Automatically process the recommendation request
+        processMessage(requestMissingFields, messages);
+      }
       
       // Clear the request
       if (onMissingFieldsHandled) {

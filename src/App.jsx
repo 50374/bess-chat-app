@@ -24,6 +24,11 @@ function App() {
     setRequestMissingFields(missingFields);
   };
 
+  // Callback to clear the missing fields request after handling
+  const handleMissingFieldsHandled = () => {
+    setRequestMissingFields(null);
+  };
+
   const handleFormSubmit = async (formData) => {
     try {
       console.log('🚀 Starting form submission...');
@@ -37,7 +42,37 @@ function App() {
       
       if (result.success) {
         alert(`✅ ${result.message}\n\nProject ID: ${result.projectId}`);
+        
+        // Hide the form and request AI product recommendation
         setShowForm(false);
+        
+        // Create a recommendation request message
+        const recommendationPrompt = `Based on the submitted BESS project requirements, please provide specific product recommendations with exact model numbers and configurations. 
+
+Project Details:
+${Object.entries(formData)
+  .filter(([key, value]) => value && key !== 'form_data')
+  .map(([key, value]) => `- ${key.replace(/_/g, ' ')}: ${value}`)
+  .join('\n')}
+
+Please analyze real product catalogs from manufacturers like Sungrow, Tesla, BYD, CATL, and others to provide:
+1. Exact model numbers and specifications
+2. Optimal system configuration (number of units, layout)
+3. Cost optimization considerations
+4. Performance characteristics matching the requirements
+5. Installation and delivery timeline estimates
+
+Focus on specific, actionable recommendations rather than general sizing advice.`;
+
+        // Add the recommendation request to chat and trigger AI response
+        const newMessages = [
+          ...chatMessages,
+          { role: 'user', content: recommendationPrompt }
+        ];
+        
+        setChatMessages(newMessages);
+        setRequestMissingFields(recommendationPrompt);
+        
       } else {
         console.error('❌ Form submission failed:', result);
         alert(`❌ ${result.message || 'There was an error saving your form. Please try again.'}`);
@@ -145,7 +180,7 @@ function App() {
         <ChatWindow 
           onInterestDetected={handleExtractInfo} 
           requestMissingFields={requestMissingFields}
-          onMissingFieldsHandled={() => setRequestMissingFields(null)}
+          onMissingFieldsHandled={handleMissingFieldsHandled}
           onChatUpdate={handleChatUpdate}
           sessionId={sessionId}
         />
