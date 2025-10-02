@@ -131,11 +131,11 @@ function App() {
           <div style={{
             marginBottom: '20px',
             padding: '18px 24px',
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            background: 'rgba(249, 249, 249, 0.3)',
             borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
             backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            border: '1px solid rgba(229, 231, 235, 0.3)',
             maxWidth: '900px',
             width: '90%'
           }}>
@@ -143,7 +143,7 @@ function App() {
               margin: '0 0 8px 0',
               fontSize: '28px',
               fontWeight: '700',
-              color: '#2d3428',
+              color: '#000000',
               textAlign: 'center',
               lineHeight: '1.2'
             }}>
@@ -152,9 +152,10 @@ function App() {
             <p style={{
               margin: '0',
               fontSize: '16px',
-              color: '#5d6b5d',
+              color: '#000000',
               textAlign: 'center',
-              lineHeight: '1.4'
+              lineHeight: '1.4',
+              opacity: '0.8'
             }}>
               Describe your Battery Energy Storage System requirements and get instant specifications
             </p>

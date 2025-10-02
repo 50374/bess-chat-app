@@ -607,7 +607,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
           }}>
             <h3 style={{ 
               marginBottom: 20, 
-              color: '#2d3428',
+              color: '#000000',
               textAlign: 'center',
               fontSize: 20,
               fontWeight: 700,
@@ -624,7 +624,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
               padding: '12px',
               marginBottom: '20px',
               fontSize: '13px',
-              color: '#2d3428'
+              color: '#000000'
             }}>
               🔒 <strong>Privacy Notice:</strong> Your project data will be anonymized for BESS equipment recommendations. We only use this information to provide you with tailored BESS solutions.
             </div>
@@ -645,7 +645,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#2d3428' 
+                    color: '#000000' 
                   }}>
                     Contact Email *
                   </label>
@@ -673,7 +673,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#2d3428' 
+                    color: '#000000' 
                   }}>
                     Company Name *
                   </label>
@@ -701,7 +701,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#2d3428' 
+                    color: '#000000' 
                   }}>
                     Project Name *
                   </label>
@@ -729,7 +729,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#2d3428' 
+                    color: '#000000' 
                   }}>
                     Organization/Tax Number *
                   </label>
@@ -860,7 +860,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
         {hasAnyData && (
           <h3 style={{ 
             marginBottom: 24, 
-            color: '#2d3428',
+            color: '#000000',
             textAlign: 'center',
             fontSize: 22,
             fontWeight: 700,
