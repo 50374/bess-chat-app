@@ -1,0 +1,87 @@
+FLUENCE GRIDSTACK PRO
+UTILITY-SCALE ENERGY STORAGE SOLUTION
+
+SYSTEM DESCRIPTION
+The Fluence GridStack Pro is a utility-scale battery energy storage system optimized for grid applications including frequency regulation, energy arbitrage, and renewable integration.
+
+POWER & ENERGY CHARACTERISTICS
+
+Electrical Specifications:
+- Rated Power: 10.0 MW
+- Energy Capacity: 20.0 MWh
+- Discharge Duration: 2.0 hours
+- C-Rate: 0.5C
+- AC Round Trip Efficiency: 88%
+- Response Time: <250ms
+
+Battery Technology Details:
+- Chemistry: Lithium Nickel Manganese Cobalt (NMC)
+- Form Factor: Modular battery racks
+- Cycle Life: 5,000 cycles at 80% DoD
+- Design Life: 20 years
+- Depth of Discharge: 100% available
+- Operating Temperature: -20°C to +45°C
+- Annual Degradation: <3% capacity fade
+
+System Architecture:
+- Topology: AC-coupled configuration
+- Enclosure: Containerized outdoor solution
+- Protection Rating: IP65
+- Fire Protection: Advanced fire suppression
+- Thermal Control: Active liquid cooling
+
+Grid Interface & Compliance:
+- Standards: IEEE 1547, NERC PRC-024
+- Certifications: UL 9540A, UL 1973
+- Grid Services: Fast frequency response, voltage regulation
+- Power Quality: <3% THD
+
+Target Applications:
+- Energy Arbitrage (daily cycling)
+- Frequency Regulation (high cycling)
+- Renewable Firming
+- Transmission Deferral
+- Spinning Reserve
+
+Commercial Specifications:
+- Warranty Period: 20 years
+- Performance Guarantee: 70% capacity retention
+- Availability Target: 98%
+- Service Life: 20+ years
+
+Delivery & Implementation:
+- Supply Scope: Turnkey solution including EPC
+- Factory Testing: Comprehensive pre-delivery testing
+- Installation: Fluence certified installation teams
+- Commissioning: Full system commissioning included
+- Training: Operations and maintenance training
+
+Global Support:
+- Monitoring: 24/7 remote monitoring via Fluence IQ
+- Analytics: Advanced performance analytics
+- Maintenance: Scheduled and predictive maintenance
+- Support: Global service organization
+
+Procurement Information:
+- Manufacturing Locations: Multiple global facilities
+- Delivery Terms: DDP, DAP, EXW options
+- Payment Terms: Milestone-based payments
+- Typical Lead Time: 16-24 weeks
+- Project Financing: Available through partners
+
+Sustainability:
+- Battery Recycling: End-of-life recycling program
+- Environmental Impact: Minimal operational emissions
+- Sustainable Sourcing: Responsible material sourcing
+- Circular Economy: Design for recyclability
+
+Contact Details:
+Fluence Energy
+Global Sales: sales@fluenceenergy.com
+Phone: +1-703-270-3000
+Website: www.fluenceenergy.com
+
+Regional Offices:
+Americas: +1-703-270-3000
+EMEA: +49-30-2359-5300
+APAC: +65-6812-7170

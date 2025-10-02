@@ -1,0 +1,77 @@
+TESLA MEGAPACK 2XL
+BATTERY ENERGY STORAGE SYSTEM
+TECHNICAL DATASHEET
+
+SYSTEM OVERVIEW
+The Tesla Megapack 2XL is a utility-scale lithium iron phosphate (LFP) battery energy storage system designed for grid-scale applications including energy arbitrage, frequency regulation, and renewable energy integration.
+
+KEY SPECIFICATIONS
+
+Power & Energy:
+- Nominal Power: 4.0 MW
+- Nominal Energy: 8.0 MWh  
+- Discharge Duration: 2.0 hours
+- C-Rate: 0.5C
+- Round Trip Efficiency: 89%
+- Response Time: <0.5 seconds
+
+Battery Technology:
+- Chemistry: Lithium Iron Phosphate (LFP)
+- Cycle Life: 6,000 cycles at 80% DoD
+- Calendar Life: 20 years
+- Depth of Discharge: 100% usable capacity
+- Operating Temperature: -20°C to +50°C
+- Degradation: <2.5% capacity fade per year
+
+System Configuration:
+- Configuration: AC-coupled
+- Enclosure Type: Outdoor weatherproof container
+- Environmental Protection: IP65
+- Fire Suppression: Integrated fire suppression system
+- Thermal Management: Active liquid cooling
+
+Grid Integration:
+- Grid Code Compliance: IEEE 1547, IEC 61727
+- Certifications: UL 9540, UL 1973, IEC 62619
+- Response Time: Sub-second frequency response
+- Power Factor: 0.95 leading to 0.95 lagging
+
+Applications:
+- Energy Arbitrage (1-2 cycles/day optimal)
+- Peak Shaving
+- Frequency Regulation
+- Renewable Energy Integration
+- Grid Stabilization
+
+Performance Warranty:
+- 20-year performance warranty
+- 80% capacity retention guarantee
+- Availability guarantee: 97%
+
+Delivery & Installation:
+- Delivery Scope: Complete containerized system
+- Installation: Factory tested, plug-and-play
+- Commissioning: Tesla certified technicians
+- Service: 24/7 monitoring and O&M packages available
+
+Commercial Terms:
+- Available Incoterms: EXW, DAP, DDP
+- Payment Terms: Standard commercial terms
+- Lead Time: 12-16 weeks from order
+- Warranty: 20 years comprehensive
+
+Technical Support:
+- 24/7 remote monitoring via Tesla Energy Gateway
+- Predictive maintenance algorithms
+- Over-the-air software updates
+- Global service network
+
+Environmental:
+- Recyclable battery components
+- End-of-life battery recycling program
+- Low environmental impact operation
+- Sustainable manufacturing practices
+
+For more information, contact Tesla Energy Sales:
+energy-sales@tesla.com
++1-888-TESLA-88

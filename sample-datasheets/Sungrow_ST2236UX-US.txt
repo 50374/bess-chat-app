@@ -1,0 +1,47 @@
+SUNGROW ENERGY STORAGE SYSTEM
+ST2236UX-US LIQUID COOLED BESS
+
+PRODUCT OVERVIEW
+The Sungrow ST2236UX-US is a utility-scale liquid-cooled battery energy storage system designed for grid applications.
+
+ELECTRICAL SPECIFICATIONS
+Rated Power: 2.236 MW
+Energy Capacity: 4.472 MWh
+Discharge Duration: 2 hours
+C-Rate: 0.5C
+Round Trip Efficiency: 89.5%
+Response Time: 200ms
+
+BATTERY TECHNOLOGY
+Chemistry: Lithium Iron Phosphate (LFP)
+Cell Configuration: Prismatic cells
+Cycle Life: 6,000 cycles at 80% DoD
+Calendar Life: 20 years
+Operating Temperature: -20°C to +50°C
+Degradation Rate: 2.5% per year
+
+SYSTEM FEATURES
+Configuration: AC-coupled
+Enclosure: IP55 rated container
+Cooling: Liquid cooling system
+Fire Safety: Aerosol fire suppression
+Grid Compliance: IEEE 1547, UL 9540
+
+APPLICATIONS
+- Energy Arbitrage
+- Frequency Regulation
+- Peak Shaving
+- Renewable Integration
+
+WARRANTY & SUPPORT
+Product Warranty: 10 years
+Performance Guarantee: 70% capacity retention
+Service: 24/7 monitoring and support
+
+COMMERCIAL TERMS
+Manufacturer: Sungrow Power Supply Co., Ltd.
+Delivery: 12-16 weeks
+Incoterms: EXW, FOB, CIF
+Payment: LC or T/T
+
+Contact: energy@sungrow.com

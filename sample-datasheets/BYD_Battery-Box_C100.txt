@@ -1,0 +1,76 @@
+BYD BATTERY-BOX COMMERCIAL C100
+LITHIUM IRON PHOSPHATE ENERGY STORAGE SYSTEM
+
+PRODUCT OVERVIEW
+The BYD Battery-Box Commercial C100 is a modular lithium iron phosphate battery energy storage system designed for commercial and industrial applications.
+
+TECHNICAL SPECIFICATIONS
+
+Power & Energy Ratings:
+- Nominal Power: 1.0 MW
+- Nominal Energy: 2.5 MWh
+- Discharge Duration: 2.5 hours
+- C-Rate: 0.4C
+- Round Trip Efficiency: 92%
+- Response Time: <100ms
+
+Battery Specifications:
+- Technology: Lithium Iron Phosphate (LiFePO4)
+- Cell Type: Prismatic LFP cells
+- Cycle Life: 8,000 cycles at 90% DoD
+- Calendar Life: 15 years
+- Usable Capacity: 100% DoD
+- Operating Temperature Range: -10°C to +45°C
+- Capacity Degradation: <2% per year
+
+System Design:
+- Configuration: DC-coupled capable, AC-coupled standard
+- Modular Design: Scalable container-based system
+- Enclosure: IP54 rated outdoor container
+- Cooling System: Natural air cooling with optional forced air
+- Fire Safety: Automatic fire suppression system
+
+Grid Connection:
+- Grid Codes: IEC 61727, AS4777, VDE-AR-N 4105
+- Certifications: IEC 62619, UL 1973, UN38.3
+- Power Electronics: Integrated inverter system
+- Grid Services: Frequency regulation, voltage support
+
+Suitable Applications:
+- Commercial Peak Shaving (1-2 cycles/day)
+- Industrial Energy Management
+- Renewable Energy Storage
+- Backup Power Applications
+- Grid Support Services
+
+Performance Guarantee:
+- Product Warranty: 10 years
+- Performance Warranty: 15 years
+- Capacity Retention: 70% after 15 years
+- System Availability: 95%
+
+Installation & Service:
+- Delivery Format: Pre-assembled container
+- Installation Time: 2-3 days typical
+- Commissioning: BYD certified engineers
+- Monitoring: Cloud-based monitoring platform
+- Maintenance: Predictive maintenance protocols
+
+Commercial Information:
+- Manufacturing: China (Shenzhen)
+- Global Availability: Worldwide shipping
+- Incoterms: FOB, CIF, DAP available
+- Payment: LC at sight, T/T options
+- Delivery Lead Time: 8-12 weeks
+
+Environmental Features:
+- Eco-friendly LFP chemistry
+- Recyclable materials
+- Low carbon footprint
+- RoHS compliant components
+
+Contact Information:
+BYD Energy Storage
+Email: energy@byd.com
+Phone: +86-755-8988-8888
+Website: www.byd.com/energy
