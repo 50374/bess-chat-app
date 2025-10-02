@@ -239,9 +239,24 @@ export default function UltraGradientBackground({
   }, [palette.join(','), quality, speed, blobs, bandStrength]);
 
   return (
-    <div className="fixed inset-0 z-0" style={{ backgroundColor: "#000" }}>
+    <div style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      right: 0, 
+      bottom: 0, 
+      zIndex: -1,
+      backgroundColor: "#000" 
+    }}>
       <canvas ref={ref} style={{ width: '100%', height: '100%', opacity }} />
-      <div className="relative z-10">{children}</div>
+      <div style={{ 
+        position: 'relative', 
+        zIndex: 1,
+        width: '100%',
+        height: '100%'
+      }}>
+        {children}
+      </div>
     </div>
   );
 }
