@@ -31,7 +31,26 @@ export const apiService = {
       }
 
       // Extract the actual message content from the nested response
-      const messageContent = chatResult.data?.data || chatResult.data;
+      const fullResponse = chatResult.data?.data || chatResult.data;
+      
+      // Parse the response to separate visible text from hidden JSON
+      let messageContent = fullResponse;
+      let extractedFormData = null;
+      
+      if (typeof fullResponse === 'string' && fullResponse.includes('===BESS_JSON===')) {
+        const parts = fullResponse.split('===BESS_JSON===');
+        messageContent = parts[0].trim(); // Visible text only
+        
+        if (parts[1]) {
+          try {
+            const jsonText = parts[1].trim();
+            extractedFormData = JSON.parse(jsonText);
+            console.log('📋 Extracted BESS form data:', extractedFormData);
+          } catch (error) {
+            console.warn('Failed to parse BESS JSON:', error);
+          }
+        }
+      }
       
       // Store thread ID if provided (for Assistant API continuity)
       if (chatResult.data?.threadId) {
@@ -43,8 +62,8 @@ export const apiService = {
       const processedResult = {
         success: true,
         data: {
-          reply: messageContent,
-          extractedInfo: null // We'll extract this from the message if needed
+          reply: messageContent, // Only the visible text, JSON hidden
+          extractedInfo: extractedFormData // Parsed form data for the cards
         }
       };
 
