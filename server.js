@@ -10,6 +10,7 @@ app.use(cors({
     'https://ainfragg.com', 
     'https://www.ainfragg.com',
     'https://extraordinary-monstera-e00408.netlify.app',
+    'https://development--extraordinary-monstera-e00408.netlify.app', // Development preview URL (free deploys)
     'https://melodic-zabaione-57cf44.netlify.app',
     'http://localhost:5173', 
     'http://localhost:5174'
