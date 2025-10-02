@@ -50,8 +50,7 @@ app.post('/api/chat', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        messages: messages,
-        temperature: 0.7
+        messages: messages
       })
     });
 
