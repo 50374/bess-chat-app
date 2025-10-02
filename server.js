@@ -228,6 +228,131 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// Product recommendation endpoint - using specialized BESS assistant
+app.post('/api/product-recommendation', async (req, res) => {
+  console.log('🎯 Product recommendation request received');
+  
+  try {
+    const { projectData, projectSummary, sessionId } = req.body;
+    console.log('📊 Project data for recommendation:', projectData);
+    
+    if (!process.env.OPENAI_PRODUCT_ASSISTANT_ID) {
+      throw new Error('Product recommendation assistant not configured');
+    }
+
+    // Create a focused recommendation prompt
+    const recommendationPrompt = `Provide specific BESS product recommendations for this project:
+
+${projectSummary}
+
+Contact Information:
+- Company: ${projectData.company_name}
+- Email: ${projectData.contact_email}
+- Project: ${projectData.project_name}
+
+Please provide detailed product recommendations with exact model numbers, quantities, and configurations.`;
+
+    // Create a new thread for this recommendation (separate from main chat)
+    const threadResponse = await fetch('https://api.openai.com/v1/threads', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'user',
+            content: recommendationPrompt
+          }
+        ]
+      })
+    });
+
+    if (!threadResponse.ok) {
+      throw new Error(`Failed to create thread: ${threadResponse.status}`);
+    }
+
+    const thread = await threadResponse.json();
+    console.log('🧵 Created recommendation thread:', thread.id);
+
+    // Run the product recommendation assistant
+    const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        assistant_id: process.env.OPENAI_PRODUCT_ASSISTANT_ID
+      })
+    });
+
+    if (!runResponse.ok) {
+      throw new Error(`Failed to run product assistant: ${runResponse.status}`);
+    }
+
+    const run = await runResponse.json();
+
+    // Poll for completion
+    let runStatus = run;
+    while (runStatus.status === 'in_progress' || runStatus.status === 'queued') {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const statusResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'OpenAI-Beta': 'assistants=v2'
+        }
+      });
+      
+      runStatus = await statusResponse.json();
+    }
+
+    if (runStatus.status !== 'completed') {
+      throw new Error(`Product recommendation failed with status: ${runStatus.status}`);
+    }
+
+    // Get the recommendation
+    const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'OpenAI-Beta': 'assistants=v2'
+      }
+    });
+
+    const threadMessages = await messagesResponse.json();
+    const recommendationMessage = threadMessages.data[0];
+
+    console.log('✅ Product recommendation received');
+
+    // Extract text content
+    const messageContent = recommendationMessage.content[0];
+    const recommendation = messageContent.type === 'text' 
+      ? messageContent.text.value 
+      : 'Unable to generate recommendation';
+
+    res.json({
+      success: true,
+      data: {
+        recommendation,
+        sessionId,
+        threadId: thread.id
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Product recommendation error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: "Failed to generate product recommendation. Please try again."
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 BESS Chat API server running on port ${PORT}`);

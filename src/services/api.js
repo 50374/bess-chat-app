@@ -145,6 +145,49 @@ export const apiService = {
     }
   },
 
+  // Get product recommendation from specialized BESS assistant
+  async getProductRecommendation(formData, sessionId) {
+    try {
+      console.log('🎯 Requesting BESS product recommendation...');
+      
+      // Format the project data for the recommendation request
+      const projectSummary = Object.entries(formData)
+        .filter(([key, value]) => value && key !== 'form_data')
+        .map(([key, value]) => `${key.replace(/_/g, ' ')}: ${value}`)
+        .join('\n');
+
+      const recommendationRequest = {
+        projectData: formData,
+        projectSummary,
+        sessionId
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/product-recommendation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(recommendationRequest)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('🎯 Product recommendation result:', result);
+      
+      return result;
+    } catch (error) {
+      console.error('💥 Product recommendation error:', error);
+      return { 
+        success: false, 
+        error: error.message,
+        message: 'Failed to get product recommendation. Please try again.'
+      };
+    }
+  },
+
   // Restore session data
   async restoreSession(sessionId) {
     try {

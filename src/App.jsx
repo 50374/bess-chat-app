@@ -43,35 +43,24 @@ function App() {
       if (result.success) {
         alert(`✅ ${result.message}\n\nProject ID: ${result.projectId}`);
         
-        // Hide the form and request AI product recommendation
+        // Hide the form
         setShowForm(false);
         
-        // Create a recommendation request message
-        const recommendationPrompt = `Based on the submitted BESS project requirements, please provide specific product recommendations with exact model numbers and configurations. 
-
-Project Details:
-${Object.entries(formData)
-  .filter(([key, value]) => value && key !== 'form_data')
-  .map(([key, value]) => `- ${key.replace(/_/g, ' ')}: ${value}`)
-  .join('\n')}
-
-Please analyze real product catalogs from manufacturers like Sungrow, Tesla, BYD, CATL, and others to provide:
-1. Exact model numbers and specifications
-2. Optimal system configuration (number of units, layout)
-3. Cost optimization considerations
-4. Performance characteristics matching the requirements
-5. Installation and delivery timeline estimates
-
-Focus on specific, actionable recommendations rather than general sizing advice.`;
-
-        // Add the recommendation request to chat and trigger AI response
-        const newMessages = [
-          ...chatMessages,
-          { role: 'user', content: recommendationPrompt }
-        ];
+        // Get product recommendation directly (not as chat)
+        console.log('🔍 Requesting product recommendation...');
+        const recommendationResult = await apiService.getProductRecommendation(formData, sessionId);
         
-        setChatMessages(newMessages);
-        setRequestMissingFields(recommendationPrompt);
+        if (recommendationResult.success) {
+          // Display the recommendation directly in the chat as an assistant message
+          const recommendationMessage = {
+            role: 'assistant', 
+            content: `## 🎯 BESS Product Recommendation\n\n${recommendationResult.data.recommendation}`
+          };
+          
+          setChatMessages(prev => [...prev, recommendationMessage]);
+        } else {
+          console.error('Failed to get product recommendation:', recommendationResult.error);
+        }
         
       } else {
         console.error('❌ Form submission failed:', result);
