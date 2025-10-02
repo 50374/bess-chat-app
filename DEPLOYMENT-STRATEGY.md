@@ -23,22 +23,23 @@ git commit -m "Your changes"
 git push origin development
 ```
 
-#### 2. Netlify Auto-Creates Free Preview
-- Netlify automatically creates a deploy preview for the `development` branch
-- Preview URL: `https://development--extraordinary-monstera-e00408.netlify.app`
+#### 2. Create Pull Request for Free Preview
+- Go to: https://github.com/50374/bess-chat-app/compare/main...development
+- Create PR from `development` to `main`
+- Netlify automatically creates Deploy Preview
+- Preview URL: `https://deploy-preview-[PR#]--extraordinary-monstera-e00408.netlify.app`
 - **Cost: 0 credits** ✅
 
 #### 3. Test on Free Preview
 - Test all functionality on the preview URL
+- Push more changes to `development` to update preview
 - Share with team/stakeholders for review
 - Iterate as needed (still 0 credits)
 
-#### 4. Deploy to Production Only When Ready
+#### 4. Deploy to Production When Ready
 ```bash
-# When ready for production, merge to main
-git checkout main
-git merge development
-git push origin main
+# Merge the PR on GitHub when ready
+# This triggers production deploy (15 credits)
 ```
 
 ### 🎯 Benefits:
