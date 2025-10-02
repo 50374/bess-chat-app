@@ -64,7 +64,7 @@ app.post('/api/chat', async (req, res) => {
     
     res.json({
       success: true,
-      message: data.choices[0].message.content,
+      data: data.choices[0].message.content,
       usage: data.usage
     });
 
