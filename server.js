@@ -6,15 +6,33 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors({
-  origin: [
-    'https://ainfragg.com', 
-    'https://www.ainfragg.com',
-    'https://extraordinary-monstera-e00408.netlify.app',
-    'https://development--extraordinary-monstera-e00408.netlify.app', // Development preview URL (free deploys)
-    'https://melodic-zabaione-57cf44.netlify.app',
-    'http://localhost:5173', 
-    'http://localhost:5174'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://ainfragg.com', 
+      'https://www.ainfragg.com',
+      'https://extraordinary-monstera-e00408.netlify.app',
+      'https://development--extraordinary-monstera-e00408.netlify.app',
+      'https://melodic-zabaione-57cf44.netlify.app',
+      'http://localhost:5173', 
+      'http://localhost:5174'
+    ];
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Check if origin matches Deploy Preview pattern
+    if (origin.match(/^https:\/\/deploy-preview-\d+--extraordinary-monstera-e00408\.netlify\.app$/)) {
+      return callback(null, true);
+    }
+    
+    // Reject origin
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
