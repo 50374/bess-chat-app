@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import ChatWindow from './ChatWindow';
 import AutoFilledForm from './AutoFilledForm';
+import UltraGradientBackground from './components/UltraGradientBackground';
 import { apiService } from './services/api.js';
-import backgroundImage from '/background.jpg';
 
 function App() {
   const [showForm, setShowForm] = useState(false);
@@ -96,124 +96,130 @@ function App() {
   }, []);
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      height: '100vh', // Fix height to prevent growing
-      background: `linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url(${backgroundImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
-      display: 'flex',
-      flexDirection: 'row',
-      width: '100vw',
-      overflow: 'hidden', // Prevent any page-level scrolling
-      // Add image optimization hints
-      imageRendering: 'optimizeSpeed'
-    }}>
-      {/* Left empty container for centering */}
-      <div style={{ flex: 1 }} />
-      {/* Center container for instruction box and chat window */}
-      <div style={{ 
-        flex: 1, 
-        display: 'flex', 
-        flexDirection: 'column',
-        justifyContent: 'flex-start', 
-        alignItems: 'center',
+    <UltraGradientBackground
+      speed={0.08}
+      opacity={1}
+      palette={["#0a0f1c", "#1a2332", "#2d1b3e", "#3e2a47"]} 
+      quality="med"
+      blobs={4}
+      bandStrength={0.0}
+    >
+      <div style={{
+        minHeight: '100vh',
         height: '100vh',
-        overflow: 'auto', // Allow scrolling within the container if needed
-        paddingTop: '6vh', // Reduced padding to give more space
-        paddingBottom: '2vh' // Add bottom padding to prevent cutoff
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100vw',
+        overflow: 'hidden'
       }}>
-        {/* Glass overlay instruction box */}
-        <div style={{
-          background: 'rgba(249, 249, 249, 0.3)',
-          backdropFilter: 'blur(10px)',
-          borderRadius: 16,
-          padding: '24px',
-          border: '1px solid rgba(229, 231, 235, 0.3)',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          maxWidth: '900px',
-          width: '100%',
-          minWidth: '350px',
-          display: 'flex',
+        {/* Left empty container for centering */}
+        <div style={{ flex: 1 }} />
+        
+        {/* Center container for instruction box and chat window */}
+        <div style={{ 
+          flex: 1, 
+          display: 'flex', 
           flexDirection: 'column',
-          textAlign: 'center',
-          marginBottom: '16px',
-          overflow: 'hidden',
-          boxSizing: 'border-box',
-          WebkitBorderRadius: 16,
-          MozBorderRadius: 16
+          justifyContent: 'flex-start', 
+          alignItems: 'center',
+          height: '100vh',
+          overflow: 'auto',
+          paddingTop: '6vh',
+          paddingBottom: '2vh'
         }}>
-          <p style={{
-            margin: 0,
-            fontSize: '22px',
-            color: '#2d3428',
-            fontWeight: '700',
-            textShadow: '0 2px 4px rgba(255,255,255,0.8)',
-            letterSpacing: '0.5px',
-            lineHeight: '1.4'
-          }}>
-            I am your AI BESS specialist. Start describing your project below.
-          </p>
-          
-          {/* Session ID display for sharing */}
+          {/* Instruction/Title Box */}
           <div style={{
-            marginTop: '12px',
+            marginBottom: '20px',
+            padding: '18px 24px',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            maxWidth: '900px',
+            width: '90%'
+          }}>
+            <h2 style={{
+              margin: '0 0 8px 0',
+              fontSize: '28px',
+              fontWeight: '700',
+              color: '#2d3428',
+              textAlign: 'center',
+              lineHeight: '1.2'
+            }}>
+              AI Infrastructure Aggregator
+            </h2>
+            <p style={{
+              margin: '0',
+              fontSize: '16px',
+              color: '#5d6b5d',
+              textAlign: 'center',
+              lineHeight: '1.4'
+            }}>
+              Describe your Battery Energy Storage System requirements and get instant specifications
+            </p>
+          </div>
+
+          {/* Session ID Display */}
+          <div style={{
             fontSize: '12px',
-            color: '#6b7280',
-            fontFamily: 'monospace'
+            color: 'rgba(255, 255, 255, 0.6)',
+            marginBottom: '15px',
+            fontFamily: 'monospace',
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+            padding: '4px 8px',
+            borderRadius: '4px'
           }}>
             Session: {sessionId.split('_')[1]}
           </div>
-        </div>
         
-        <ChatWindow 
-          onInterestDetected={handleExtractInfo} 
-          requestMissingFields={requestMissingFields}
-          onMissingFieldsHandled={handleMissingFieldsHandled}
-          onChatUpdate={handleChatUpdate}
-          sessionId={sessionId}
-        />
-        
-        {/* Contact form and submit button under chat window when ready */}
-        {extractedInfo && (
-          <AutoFilledForm 
-            extractedInfo={extractedInfo} 
-            onSubmit={handleFormSubmit} 
-            onRequestMissingFields={handleRequestMissingFields}
-            renderContactAndSubmit={true} // Only render contact/submit section
-            maxWidth="900px" // Match chat window width
+          <ChatWindow 
+            onInterestDetected={handleExtractInfo} 
+            requestMissingFields={requestMissingFields}
+            onMissingFieldsHandled={handleMissingFieldsHandled}
+            onChatUpdate={handleChatUpdate}
+            sessionId={sessionId}
           />
-        )}
-      </div>
-      {/* Right container for BESS Summary only - with proper scrolling */}
-      <div style={{ 
-        flex: 1, 
-        display: 'flex', 
-        justifyContent: 'flex-start', 
-        alignItems: 'flex-start',
-        height: '100vh',
-        padding: '6vh 0 2vh 20px'
-      }}>
-        <div style={{
-          width: '100%',
-          maxWidth: '450px',
-          height: 'calc(100vh - 8vh)', // Account for padding
-          overflowY: 'auto', // Scrollable container
-          overflowX: 'hidden'
-        }}>
+        
+          {/* Contact form and submit button under chat window when ready */}
           {extractedInfo && (
             <AutoFilledForm 
               extractedInfo={extractedInfo} 
               onSubmit={handleFormSubmit} 
               onRequestMissingFields={handleRequestMissingFields}
-              renderSummaryOnly={true} // Only render BESS Summary cards
+              renderContactAndSubmit={true}
+              maxWidth="900px"
             />
           )}
         </div>
+        
+        {/* Right side panel for BESS summary cards when available */}
+        <div style={{ 
+          flex: 1, 
+          padding: '6vh 20px 2vh 0',
+          display: 'flex',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start'
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '450px',
+            height: 'calc(100vh - 8vh)',
+            overflowY: 'auto',
+            overflowX: 'hidden'
+          }}>
+            {extractedInfo && (
+              <AutoFilledForm 
+                extractedInfo={extractedInfo} 
+                onSubmit={handleFormSubmit} 
+                onRequestMissingFields={handleRequestMissingFields}
+                renderSummaryOnly={true}
+              />
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </UltraGradientBackground>
   );
 }
 
