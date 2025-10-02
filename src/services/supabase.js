@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
 // These will be environment variables in production
+// Updated: Fixed contact form field mapping for database submission
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'your_supabase_url_here'
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your_supabase_anon_key_here'
 
