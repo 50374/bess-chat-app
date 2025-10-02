@@ -1,16 +1,47 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 3001;
 
-app.use(bodyParser.json());
+// Middleware
+app.use(cors({
+  origin: [
+    'https://ainfragg.com', 
+    'https://www.ainfragg.com',
+    'https://extraordinary-monstera-e00408.netlify.app',
+    'https://melodic-zabaione-57cf44.netlify.app',
+    'http://localhost:5173', 
+    'http://localhost:5174'
+  ],
+  credentials: true
+}));
+app.use(express.json({ limit: '10mb' }));
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'BESS Chat API',
+    hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
+});
+
+// OpenAI chat endpoint
 app.post('/api/chat', async (req, res) => {
-  const { messages } = req.body;
+  console.log('📨 Chat request received from:', req.headers.origin);
+  console.log('🔑 OpenAI API Key present:', !!process.env.OPENAI_API_KEY);
+  
   try {
+    const { messages, extractedInfo } = req.body;
+    console.log('📝 Messages count:', messages?.length);
+    
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OpenAI API key not configured');
+    }
+    
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -19,17 +50,36 @@ app.post('/api/chat', async (req, res) => {
       },
       body: JSON.stringify({
         model: 'gpt-5-mini',
-        messages
+        messages: messages,
+        temperature: 0.7
       })
     });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
     const data = await response.json();
-    const reply = data.choices[0].message.content;
-    res.json({ reply });
+    console.log('✅ OpenAI response received');
+    
+    res.json({
+      success: true,
+      message: data.choices[0].message.content,
+      usage: data.usage
+    });
+
   } catch (error) {
-    res.status(500).json({ reply: 'Error connecting to OpenAI.' });
+    console.error('❌ Chat error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: "I'm having trouble connecting right now. Please try again in a moment."
+    });
   }
 });
 
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 BESS Chat API server running on port ${PORT}`);
+  console.log(`🔑 OpenAI API Key configured: ${!!process.env.OPENAI_API_KEY}`);
 });
