@@ -102,7 +102,13 @@ export const apiService = {
   // Save form submission
   async submitForm(formData, sessionId, chatMessages = []) {
     try {
+      console.log('📋 Starting form submission process...');
+      console.log('📝 Form data received:', formData);
+      console.log('🆔 Session ID:', sessionId);
+      console.log('💬 Chat messages:', chatMessages);
+      
       const userIP = await this.getUserIP()
+      console.log('🌐 User IP:', userIP);
       
       const projectData = {
         session_id: sessionId,
@@ -112,20 +118,25 @@ export const apiService = {
         user_ip: userIP
       }
 
+      console.log('🔄 Prepared project data:', projectData);
+
       const result = await supabaseService.saveProject(projectData)
       
+      console.log('📊 Supabase result:', result);
+      
       if (result.success) {
-        console.log('Form submitted and saved to database')
+        console.log('✅ Form submitted and saved to database')
         return { 
           success: true, 
           message: 'Your BESS requirements have been saved successfully!',
           projectId: result.data[0]?.id
         }
       } else {
+        console.error('❌ Supabase save failed:', result.error);
         throw new Error(result.error)
       }
     } catch (error) {
-      console.error('Form submission error:', error)
+      console.error('💥 Form submission error:', error)
       return { 
         success: false, 
         error: error.message,

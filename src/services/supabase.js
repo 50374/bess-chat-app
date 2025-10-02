@@ -12,6 +12,8 @@ export const supabaseService = {
   // Save BESS project data
   async saveProject(projectData) {
     try {
+      console.log('🗄️ Saving project data to Supabase:', projectData);
+      
       // Map contact form fields to database schema
       const mappedData = {
         session_id: projectData.session_id,
@@ -28,19 +30,20 @@ export const supabaseService = {
         grid_code_compliance: projectData.grid_code_compliance,
         certifications: projectData.certifications,
         
-        // Contact information mapping
+        // Contact information mapping - Fixed field names
         company_name: projectData.company_name,
-        email: projectData.contact_email, // Map contact_email to email
-        contact_person: projectData.contact_person || '', // Optional field
-        phone: projectData.phone || '', // Optional field
+        email: projectData.contact_email, // Map contact_email to email column
+        contact_person: projectData.contact_person || '', 
+        phone: projectData.phone || '', 
         project_location: projectData.project_name || '', // Map project_name to project_location
         
-        // Store organization_tax_number and other contact data in form_data
+        // Store all contact data in form_data for reference
         form_data: {
           ...projectData.form_data,
           organization_tax_number: projectData.organization_tax_number,
           contact_email: projectData.contact_email,
-          project_name: projectData.project_name
+          project_name: projectData.project_name,
+          company_name: projectData.company_name
         },
         chat_messages: projectData.chat_messages,
         user_ip: projectData.user_ip,
@@ -49,17 +52,22 @@ export const supabaseService = {
         status: projectData.status || 'submitted'
       };
 
+      console.log('🔄 Mapped data for database:', mappedData);
+
       const { data, error } = await supabase
         .from('bess_projects')
         .insert([mappedData])
         .select()
 
-      if (error) throw error
+      if (error) {
+        console.error('🚨 Supabase error:', error);
+        throw error;
+      }
       
-      console.log('Project saved to Supabase:', data)
+      console.log('✅ Project saved to Supabase:', data)
       return { success: true, data }
     } catch (error) {
-      console.error('Error saving to Supabase:', error)
+      console.error('💥 Error saving to Supabase:', error)
       return { success: false, error: error.message }
     }
   },

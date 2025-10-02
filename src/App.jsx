@@ -26,18 +26,24 @@ function App() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      console.log('Submitting form with data:', formData);
+      console.log('🚀 Starting form submission...');
+      console.log('📝 Form data:', formData);
+      console.log('🆔 Session ID:', sessionId);
+      console.log('💬 Chat messages count:', chatMessages.length);
       
       const result = await apiService.submitForm(formData, sessionId, chatMessages);
+      
+      console.log('📨 API response:', result);
       
       if (result.success) {
         alert(`✅ ${result.message}\n\nProject ID: ${result.projectId}`);
         setShowForm(false);
       } else {
-        alert(`❌ ${result.message}`);
+        console.error('❌ Form submission failed:', result);
+        alert(`❌ ${result.message || 'There was an error saving your form. Please try again.'}`);
       }
     } catch (error) {
-      console.error('Form submission error:', error);
+      console.error('💥 Form submission error:', error);
       alert('❌ There was an error submitting your form. Please try again.');
     }
   };
