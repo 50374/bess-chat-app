@@ -166,7 +166,7 @@ function App() {
           {/* Session ID Display */}
           <div style={{
             fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.6)',
+            color: 'rgba(255, 255, 255, 0.7)',
             marginBottom: '15px',
             fontFamily: 'monospace',
             backgroundColor: 'rgba(0, 0, 0, 0.2)',
