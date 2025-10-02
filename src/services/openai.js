@@ -14,7 +14,8 @@ export const openaiService = {
         body: JSON.stringify({ 
           messages,
           extractedInfo,
-          assistantId // Include assistant ID if available
+          assistantId, // Include assistant ID if available
+          threadId: window.openaiThreadId // Pass existing thread ID if we have one
         })
       })
 

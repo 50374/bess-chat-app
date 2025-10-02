@@ -33,6 +33,12 @@ export const apiService = {
       // Extract the actual message content from the nested response
       const messageContent = chatResult.data?.data || chatResult.data;
       
+      // Store thread ID if provided (for Assistant API continuity)
+      if (chatResult.data?.threadId) {
+        window.openaiThreadId = chatResult.data.threadId;
+        console.log('🧵 Stored thread ID for future use:', chatResult.data.threadId);
+      }
+      
       // Return the processed result with just the message content
       const processedResult = {
         success: true,
