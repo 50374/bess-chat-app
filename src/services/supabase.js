@@ -14,28 +14,37 @@ export const supabaseService = {
     try {
       console.log('🗄️ Saving project data to Supabase:', projectData);
       
+      // Helper function to convert empty strings to null for numeric fields
+      const toNumericOrNull = (value) => {
+        if (value === '' || value === null || value === undefined) return null;
+        const num = parseFloat(value);
+        return isNaN(num) ? null : num;
+      };
+      
       // Map contact form fields to database schema
       const mappedData = {
         session_id: projectData.session_id,
-        application: projectData.application,
-        nominal_power_mw: projectData.nominal_power_mw,
-        nominal_energy_mwh: projectData.nominal_energy_mwh,
-        discharge_duration_h: projectData.discharge_duration_h,
-        expected_daily_cycles: projectData.expected_daily_cycles,
-        delivery_schedule: projectData.delivery_schedule,
-        incoterms: projectData.incoterms,
-        chemistry: projectData.chemistry,
-        round_trip_efficiency_pct: projectData.round_trip_efficiency_pct,
-        response_time_s: projectData.response_time_s,
-        grid_code_compliance: projectData.grid_code_compliance,
-        certifications: projectData.certifications,
         
-        // Contact information mapping - Fixed field names
-        company_name: projectData.company_name,
-        email: projectData.contact_email, // Map contact_email to email column
-        contact_person: projectData.contact_person || '', 
-        phone: projectData.phone || '', 
-        project_location: projectData.project_name || '', // Map project_name to project_location
+        // Only include technical fields if they have values (convert empty strings to null)
+        application: projectData.application || null,
+        nominal_power_mw: toNumericOrNull(projectData.nominal_power_mw),
+        nominal_energy_mwh: toNumericOrNull(projectData.nominal_energy_mwh),
+        discharge_duration_h: toNumericOrNull(projectData.discharge_duration_h),
+        expected_daily_cycles: toNumericOrNull(projectData.expected_daily_cycles),
+        delivery_schedule: projectData.delivery_schedule || null,
+        incoterms: projectData.incoterms || null,
+        chemistry: projectData.chemistry || null,
+        round_trip_efficiency_pct: toNumericOrNull(projectData.round_trip_efficiency_pct),
+        response_time_s: toNumericOrNull(projectData.response_time_s),
+        grid_code_compliance: projectData.grid_code_compliance || null,
+        certifications: projectData.certifications || null,
+        
+        // Contact information mapping - Required fields for contact form
+        company_name: projectData.company_name || null,
+        email: projectData.contact_email || null, // Map contact_email to email column
+        contact_person: projectData.contact_person || null, 
+        phone: projectData.phone || null, 
+        project_location: projectData.project_name || null, // Map project_name to project_location
         
         // Store all contact data in form_data for reference
         form_data: {
