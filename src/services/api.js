@@ -30,6 +30,18 @@ export const apiService = {
         return chatResult
       }
 
+      // Extract the actual message content from the nested response
+      const messageContent = chatResult.data?.data || chatResult.data;
+      
+      // Return the processed result with just the message content
+      const processedResult = {
+        success: true,
+        data: {
+          reply: messageContent,
+          extractedInfo: null // We'll extract this from the message if needed
+        }
+      };
+
       // If we have extracted info, save to Supabase
       if (extractedInfo && Object.keys(extractedInfo).length > 0) {
         const userIP = await this.getUserIP()
@@ -51,7 +63,7 @@ export const apiService = {
         }
       }
 
-      return chatResult
+      return processedResult
     } catch (error) {
       console.error('Error processing chat message:', error)
       return { 

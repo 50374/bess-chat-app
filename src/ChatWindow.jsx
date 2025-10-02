@@ -355,7 +355,7 @@ JSON SCHEMA:
       const result = await apiService.processChatMessage(newMessages, extractedInfo, sessionId);
       
       if (result.success) {
-        const displayMessage = result.data; // Server sends message directly in 'data' field
+        const displayMessage = result.data.reply; // Now correctly extracting from data.reply
         setMessages([...newMessages, { role: 'assistant', content: displayMessage }]);
         
         // Extract form data if provided in the response
