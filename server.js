@@ -45,16 +45,17 @@ app.post('/api/chat', async (req, res) => {
 
     // If using Assistants API
     if (assistantId) {
-      // Create a thread
-      const threadResponse = await fetch('https://api.openai.com/v1/threads', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json',
-          'OpenAI-Beta': 'assistants=v2'
-        },
-        body: JSON.stringify({})
-      });
+      try {
+        // Create a thread
+        const threadResponse = await fetch('https://api.openai.com/v1/threads', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json',
+            'OpenAI-Beta': 'assistants=v2'
+          },
+          body: JSON.stringify({})
+        });
 
       if (!threadResponse.ok) {
         throw new Error(`Failed to create thread: ${threadResponse.status}`);
@@ -127,12 +128,57 @@ app.post('/api/chat', async (req, res) => {
       const assistantMessage = threadMessages.data[0]; // Latest message
 
       console.log('✅ Assistant response received');
+      console.log('📄 Assistant message structure:', JSON.stringify(assistantMessage, null, 2));
+      
+      // Extract text content safely
+      let responseText = '';
+      if (assistantMessage && assistantMessage.content && assistantMessage.content[0]) {
+        if (assistantMessage.content[0].text && assistantMessage.content[0].text.value) {
+          responseText = assistantMessage.content[0].text.value;
+        } else {
+          responseText = 'Assistant response received but content format is unexpected.';
+        }
+      } else {
+        responseText = 'Assistant response received but no content found.';
+      }
       
       res.json({
         success: true,
-        data: assistantMessage.content[0].text.value,
+        data: responseText,
         usage: runStatus.usage
       });
+
+      } catch (assistantError) {
+        console.error('❌ Assistant API error:', assistantError.message);
+        console.log('🔄 Falling back to regular chat completion');
+        
+        // Fallback to regular chat completions API
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'gpt-5-mini',
+            messages: messages
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ Fallback response received');
+        
+        res.json({
+          success: true,
+          data: data.choices[0].message.content,
+          usage: data.usage
+        });
+      }
 
     } else {
       // Fallback to regular chat completions API
