@@ -4,6 +4,7 @@ export const openaiService = {
   async sendChatMessage(messages, extractedInfo = null) {
     try {
       const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+      const assistantId = import.meta.env.VITE_OPENAI_ASSISTANT_ID
       
       const response = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
@@ -12,7 +13,8 @@ export const openaiService = {
         },
         body: JSON.stringify({ 
           messages,
-          extractedInfo 
+          extractedInfo,
+          assistantId // Include assistant ID if available
         })
       })
 
