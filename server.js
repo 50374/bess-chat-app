@@ -62,6 +62,8 @@ app.post('/api/chat', async (req, res) => {
 
     const data = await response.json();
     console.log('✅ OpenAI response received');
+    console.log('📊 Full OpenAI response:', JSON.stringify(data, null, 2));
+    console.log('💬 Message content:', data.choices?.[0]?.message?.content);
     
     res.json({
       success: true,
