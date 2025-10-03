@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ChatWindow from './ChatWindow';
 import AutoFilledForm from './AutoFilledForm';
 import UltraGradientBackground from './components/UltraGradientBackground';
+import AggregationAnalytics from './components/AggregationAnalytics';
 import { apiService } from './services/api.js';
 
 function App() {
@@ -125,8 +126,22 @@ function App() {
         position: 'relative',
         zIndex: 1
       }}>
-        {/* Left empty container for centering */}
-        <div style={{ flex: 1 }} />
+        {/* Left panel for Market Aggregation Analytics */}
+        <div style={{ 
+          flex: 1, 
+          padding: '4vh 20px 4vh 20px',
+          display: 'flex',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-start',
+          minHeight: '100vh'
+        }}>
+          <div style={{
+            width: '100%',
+            maxWidth: '350px'
+          }}>
+            <AggregationAnalytics sessionId={sessionId} />
+          </div>
+        </div>
         
         {/* Center container for instruction box and chat window */}
         <div style={{ 
