@@ -984,13 +984,13 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
             key={key} 
             className={`floating-card floating-card-${index}`}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              backdropFilter: 'blur(20px)',
-              borderRadius: 14,
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 16,
               padding: '18px 22px',
               marginBottom: 16,
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               transformOrigin: 'center',
               position: 'relative'
@@ -1017,7 +1017,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
             <div style={{
               fontSize: 15,
               color: 'rgba(255, 255, 255, 0.95)',
-              fontWeight: 600,
+              fontWeight: 500,
               lineHeight: 1.5
             }}>
               {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value}

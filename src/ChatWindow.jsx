@@ -406,7 +406,7 @@ CRITICAL BESS KNOWLEDGE:
           style={{
             background: loading || !input.trim() 
               ? 'rgba(255, 255, 255, 0.1)' 
-              : 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.9))',
+              : 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8))',
             color: loading || !input.trim() ? 'rgba(255, 255, 255, 0.4)' : '#ffffff',
             border: `1px solid ${loading || !input.trim() 
               ? 'rgba(255, 255, 255, 0.1)' 
