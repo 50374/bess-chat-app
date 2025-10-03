@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 
 const AggregationAnalytics = ({ sessionId }) => {
   const [analytics, setAnalytics] = useState({
-    totalProjects: 156,
-    totalMW: 2840,
-    totalMWh: 7200, // 7.2 GWh - positioned in the middle of your curve
+    totalProjects: 123,
+    totalMW: 2180,
+    totalMWh: 5600, // 5.6 GWh - positioned to show around €97
     projectsByDuration: {
-      '1h': 52,
-      '2h': 48,
-      '4h': 38,
-      '8h': 18
+      '1h': 41,
+      '2h': 38,
+      '4h': 29,
+      '8h': 15
     },
-    currentAggregation: 7.2 // 7.2 GWh - should show around €70-80 on your curve
+    currentAggregation: 5.6 // 5.6 GWh - should show around €97 on the curve
   });
 
   // Price curve calculation: realistic stepped curve matching the provided graph
@@ -310,35 +310,34 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
           );
         })}
         
-        {/* Filled portion of curve */}
+        {/* Filled portion of curve (solid line up to current position) */}
         <defs>
           <linearGradient id="curveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="rgba(59, 130, 246, 0.8)" />
-            <stop offset="100%" stopColor="rgba(147, 51, 234, 0.8)" />
+            <stop offset="0%" stopColor="rgba(59, 130, 246, 0.9)" />
+            <stop offset="100%" stopColor="rgba(147, 51, 234, 0.9)" />
           </linearGradient>
         </defs>
         
+        {/* Solid line up to current position */}
         <path
-          d={pathData}
+          d={curvePoints.slice(0, Math.floor(curvePoints.length * fillPercentage / 100) + 1)
+            .map((point, i) => `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+            .join(' ')}
           stroke="url(#curveGradient)"
-          strokeWidth="2"
+          strokeWidth="3"
           fill="none"
-          strokeDasharray="4,2"
-          strokeDashoffset={0}
           transform={`translate(${margin.left}, ${margin.top})`}
-          style={{
-            strokeDasharray: `${fillPercentage * 4}, 400`,
-            transition: 'stroke-dasharray 1s ease-in-out'
-          }}
         />
         
-        {/* Unfilled portion (dashed) */}
+        {/* Dashed line from current position to end */}
         <path
-          d={pathData}
-          stroke="rgba(255, 255, 255, 0.2)"
-          strokeWidth="1"
+          d={curvePoints.slice(Math.floor(curvePoints.length * fillPercentage / 100))
+            .map((point, i) => `${i === 0 ? 'M' : 'L'} ${point.x} ${point.y}`)
+            .join(' ')}
+          stroke="rgba(59, 130, 246, 0.4)"
+          strokeWidth="2"
           fill="none"
-          strokeDasharray="2,3"
+          strokeDasharray="6,4"
           transform={`translate(${margin.left}, ${margin.top})`}
         />
         
@@ -350,6 +349,51 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
           fill="rgba(59, 130, 246, 0.9)"
           stroke="rgba(255, 255, 255, 0.8)"
           strokeWidth="2"
+        />
+        
+        {/* Floating price label at transition point */}
+        <g transform={`translate(${margin.left + currentX}, ${margin.top + currentY - 25})`}>
+          {/* Label background with subtle animation */}
+          <rect
+            x="-22"
+            y="-14"
+            width="44"
+            height="24"
+            rx="12"
+            fill="rgba(255, 255, 255, 0.95)"
+            stroke="rgba(59, 130, 246, 0.4)"
+            strokeWidth="1.5"
+            filter="drop-shadow(0 4px 12px rgba(0,0,0,0.15))"
+          >
+            <animate 
+              attributeName="stroke-width" 
+              values="1.5;2;1.5" 
+              dur="2s" 
+              repeatCount="indefinite"
+            />
+          </rect>
+          {/* Price text */}
+          <text
+            x="0"
+            y="3"
+            textAnchor="middle"
+            fill="rgba(59, 130, 246, 0.9)"
+            fontSize="12"
+            fontWeight="700"
+          >
+            €{Math.round(currentPrice)}
+          </text>
+        </g>
+        
+        {/* Vertical line from curve to x-axis showing current position */}
+        <line
+          x1={margin.left + currentX}
+          y1={margin.top + currentY}
+          x2={margin.left + currentX}
+          y2={margin.top + chartHeight}
+          stroke="rgba(59, 130, 246, 0.3)"
+          strokeWidth="1"
+          strokeDasharray="2,2"
         />
         
         {/* Y-axis labels */}
