@@ -1,53 +1,47 @@
 import React, { useState } from 'react';
 
 const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, renderSummaryOnly = false, renderContactAndSubmit = false, maxWidth }) => {
-  // Add CSS for card expansion animation with staggered appearance and hover effects
+  // Add CSS for Railway-style scrollbars and card animations
   React.useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
+      /* Railway-style scrollbars */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+      
+      /* Firefox scrollbar */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+      }
+      
       @keyframes expandCard {
         0% {
           opacity: 0;
-          transform: scale(0.1) translateY(20px);
-          border-radius: 50%;
-        }
-        25% {
-          opacity: 0.3;
-          transform: scale(1, 0.2) translateY(15px);
-          border-radius: 25%;
-        }
-        50% {
-          opacity: 0.6;
-          transform: scale(1, 0.6) translateY(10px);
-          border-radius: 20%;
-        }
-        75% {
-          opacity: 0.8;
-          transform: scale(1, 0.9) translateY(5px);
-          border-radius: 16px;
+          transform: scale(0.95) translateY(10px);
         }
         100% {
           opacity: 1;
           transform: scale(1) translateY(0px);
-          border-radius: 14px;
         }
       }
-      
-      @keyframes floatHover {
-        0%, 100% { 
-          transform: translateY(0px) scale(1);
-          box-shadow: 0 4px 12px rgba(107, 124, 107, 0.15);
-        }
-        50% { 
-          transform: translateY(-8px) scale(1.02);
-          box-shadow: 0 8px 25px rgba(107, 124, 107, 0.25);
-        }
-      }
-      
-      @keyframes tooltipFadeIn {
-        0% {
-          opacity: 0;
-          transform: translateY(10px);
         }
         100% {
           opacity: 1;
@@ -598,20 +592,24 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
         }}>
           {/* Contact Form */}
           <div style={{
-            background: 'rgba(249, 249, 249, 0.3)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
             borderRadius: 16,
             padding: '24px',
-            border: '1px solid rgba(229, 231, 235, 0.3)',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
             <h3 style={{ 
               marginBottom: 20, 
-              color: '#000000',
+              background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               textAlign: 'center',
               fontSize: 20,
-              fontWeight: 700,
-              textShadow: '0 2px 4px rgba(255,255,255,0.8)'
+              fontWeight: 600
             }}>
               Submit Your BESS Project
             </h3>
@@ -624,7 +622,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
               padding: '12px',
               marginBottom: '20px',
               fontSize: '13px',
-              color: '#000000'
+              color: 'rgba(255, 255, 255, 0.8)'
             }}>
               🔒 <strong>Privacy Notice:</strong> Your project data will be anonymized for BESS equipment recommendations. We only use this information to provide you with tailored BESS solutions.
             </div>
@@ -645,7 +643,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#000000' 
+                    color: 'rgba(255, 255, 255, 0.9)' 
                   }}>
                     Contact Email *
                   </label>
@@ -656,11 +654,27 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid rgba(229, 231, 235, 0.5)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '14px'
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: '#fff',
+                      outline: 'none',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
                     }}
                     placeholder="john.doe@company.com"
                   />
@@ -673,7 +687,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#000000' 
+                    color: 'rgba(255, 255, 255, 0.9)' 
                   }}>
                     Company Name *
                   </label>
@@ -684,11 +698,27 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid rgba(229, 231, 235, 0.5)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '14px'
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: '#fff',
+                      outline: 'none',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Your Company Ltd."
                   />
@@ -701,7 +731,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#000000' 
+                    color: 'rgba(255, 255, 255, 0.9)' 
                   }}>
                     Project Name *
                   </label>
@@ -712,11 +742,27 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid rgba(229, 231, 235, 0.5)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '14px'
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: '#fff',
+                      outline: 'none',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
                     }}
                     placeholder="Solar Farm BESS Project"
                   />
@@ -729,7 +775,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     marginBottom: '6px', 
                     fontSize: '14px', 
                     fontWeight: '600', 
-                    color: '#000000' 
+                    color: 'rgba(255, 255, 255, 0.9)' 
                   }}>
                     Organization/Tax Number *
                   </label>
@@ -740,11 +786,27 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid rgba(229, 231, 235, 0.5)',
-                      borderRadius: '8px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                      fontSize: '14px'
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: '#fff',
+                      outline: 'none',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      backdropFilter: 'blur(10px)'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.15)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                      e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
                     }}
                     placeholder="VAT/Tax ID or Organization Number"
                   />
@@ -757,29 +819,33 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                 disabled={isSubmitting}
                 style={{
                   width: '100%',
-                  padding: '14px 24px',
-                  backgroundColor: isSubmitting ? '#9ca3af' : '#2d3428',
-                  color: 'white',
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8))',
+                  color: '#fff',
                   border: 'none',
-                  borderRadius: '8px',
+                  borderRadius: '12px',
+                  padding: '16px 24px',
                   fontSize: '16px',
                   fontWeight: '600',
                   cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 3px 12px rgba(45, 52, 40, 0.3)'
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 4px 15px rgba(59, 130, 246, 0.2)',
+                  opacity: isSubmitting ? 0.7 : 1,
+                  transform: 'translateZ(0)'
                 }}
                 onMouseEnter={(e) => {
                   if (!isSubmitting) {
-                    e.target.style.backgroundColor = '#1a1f1a';
-                    e.target.style.transform = 'translateY(-2px)';
-                    e.target.style.boxShadow = '0 5px 16px rgba(45, 52, 40, 0.4)';
+                    e.target.style.transform = 'translateY(-2px) scale(1.02)';
+                    e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.3)';
+                    e.target.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(147, 51, 234, 0.9))';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isSubmitting) {
-                    e.target.style.backgroundColor = '#2d3428';
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = '0 3px 12px rgba(45, 52, 40, 0.3)';
+                    e.target.style.transform = 'translateZ(0)';
+                    e.target.style.boxShadow = '0 4px 15px rgba(59, 130, 246, 0.2)';
+                    e.target.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8))';
                   }
                 }}
               >
@@ -797,15 +863,20 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
           width: '100%'
         }}>
           <div style={{
-            background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.05) 100%)',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
             border: '1px solid rgba(34, 197, 94, 0.3)',
             borderRadius: 16,
             padding: '24px',
-            textAlign: 'center'
+            textAlign: 'center',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)'
           }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
             <h3 style={{ 
-              color: '#15803d', 
+              background: 'linear-gradient(135deg, #10b981, #22c55e)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               marginBottom: '12px',
               fontSize: '20px',
               fontWeight: '700'
@@ -813,18 +884,20 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
               Project Submitted Successfully!
             </h3>
             <p style={{ 
-              color: '#166534', 
+              color: 'rgba(255, 255, 255, 0.8)', 
               fontSize: '16px',
               marginBottom: '16px'
             }}>
               Your BESS project specifications have been saved and our team will generate customized equipment recommendations for you.
             </p>
             <div style={{
-              backgroundColor: 'rgba(34, 197, 94, 0.1)',
+              background: 'rgba(34, 197, 94, 0.1)',
               padding: '12px',
-              borderRadius: '8px',
+              borderRadius: '12px',
               fontSize: '14px',
-              color: '#166534'
+              color: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(34, 197, 94, 0.2)',
+              backdropFilter: 'blur(10px)'
             }}>
               📧 You will receive BESS recommendations at: <strong>{contactInfo.contact_email}</strong>
             </div>
@@ -847,24 +920,28 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
     }}>
       {/* Background Overlay Container - matches chat window translucency */}
       <div style={{
-        background: 'rgba(249, 249, 249, 0.3)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(20px)',
         borderRadius: 16,
         padding: '24px',
-        border: '1px solid rgba(229, 231, 235, 0.3)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)',
         flex: 1,
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
         {hasAnyData && (
           <h3 style={{ 
             marginBottom: 24, 
-            color: '#000000',
+            background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
             textAlign: 'center',
             fontSize: 22,
-            fontWeight: 700,
-            textShadow: '0 2px 4px rgba(255,255,255,0.8)',
+            fontWeight: 600,
             letterSpacing: '0.5px'
           }}>
             BESS Summary
@@ -876,12 +953,13 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
           <div style={{
             background: 'rgba(239, 68, 68, 0.1)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '8px',
-            padding: '12px',
-            marginBottom: '16px'
+            borderRadius: '12px',
+            padding: '16px',
+            marginBottom: '20px',
+            backdropFilter: 'blur(10px)'
           }}>
             <h4 style={{ 
-              color: '#dc2626', 
+              color: '#fca5a5', 
               margin: '0 0 8px 0', 
               fontSize: '14px', 
               fontWeight: 'bold' 
@@ -890,7 +968,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
             </h4>
             {validationIssues.map((issue, index) => (
               <div key={index} style={{ 
-                color: '#dc2626', 
+                color: 'rgba(255, 255, 255, 0.9)', 
                 fontSize: '13px', 
                 marginBottom: '4px' 
               }}>
@@ -906,14 +984,14 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
             key={key} 
             className={`floating-card floating-card-${index}`}
             style={{
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(252, 252, 250, 0.9) 100%)',
-              backdropFilter: 'blur(12px)',
+              background: 'rgba(255, 255, 255, 0.05)',
+              backdropFilter: 'blur(20px)',
               borderRadius: 14,
               padding: '18px 22px',
               marginBottom: 16,
-              boxShadow: '0 3px 12px rgba(45, 52, 40, 0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-              border: '1px solid rgba(122, 138, 110, 0.25)',
-              transition: 'all 0.3s ease',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               transformOrigin: 'center',
               position: 'relative'
             }}
@@ -929,17 +1007,16 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
             <div style={{
               fontSize: 13,
               fontWeight: 700,
-              color: '#2d3428',
+              color: 'rgba(255, 255, 255, 0.7)',
               marginBottom: 7,
               textTransform: 'uppercase',
-              letterSpacing: '0.8px',
-              textShadow: '0 1px 1px rgba(255,255,255,0.6)'
+              letterSpacing: '0.8px'
             }}>
               {label}
             </div>
             <div style={{
               fontSize: 15,
-              color: '#1a1f1a',
+              color: 'rgba(255, 255, 255, 0.95)',
               fontWeight: 600,
               lineHeight: 1.5
             }}>
