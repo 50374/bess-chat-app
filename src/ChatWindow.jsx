@@ -48,260 +48,7 @@ CRITICAL BESS KNOWLEDGE:
   * Energy Arbitrage: 2-4 hours (0.25-0.5C), typically 1-2 cycles/day 
   * Peak Shaving: 2-6 hours (0.17-0.5C), typically 1-2 cycles/day
   * Backup Power: 4-8+ hours (0.125-0.25C), typically <1 cycle/day
-- **Daily Cycling**: Critical for warranty and degradation calculations
-  * Ask specifically: "How many charge/discharge cycles per day do you expect?"
-  * Typical ranges: 0.2-2 cycles/day (most applications), up to 365 cycles/day (freq regulation)
-  * VALIDATION: Daily cycles × discharge duration must be ≤ 24 hours
-  * If validation fails, explain the issue and ask for clarification
-
-VALIDATION RULES - CRITICAL:
-- **Physical Constraints**: Daily cycles × discharge duration ≤ 24 hours
-- **C-rate Consistency**: Verify C-rate matches power/energy ratio
-- **Application Logic**: Check cycling frequency matches typical application patterns
-- **Range Checks**: Power (0.1-1000 MW), Duration (0.25-12 hours), Cycles (0.1-365/day)
-- If ANY validation fails, immediately flag the issue and ask for clarification
-- NEVER accept impossible combinations - always validate before populating JSON
-
-CONVERSATION APPROACH:
-- Be warm, friendly, and systematic in gathering information
-- IMMEDIATELY recognize and convert C-rates to duration: "Perfect! 0.5C means 2 hours duration"
-- Follow the PRIORITY ORDER for required fields: Power → Duration → Application → Delivery Date → Incoterms
-- Ask ONE question at a time to avoid overwhelming the user
-- Build naturally from their initial request to complete specifications
-- Provide context for why each specification matters
-- Share relevant insights and recommendations as you learn more
-- Once all required fields are gathered, ask if there are other considerations they want to address
-- Populate additional technical fields based on best practices for their project type
-- VERIFY all information in the form is correct before offering contact submission
-- Be conversational and supportive throughout the process
-
-CONVERSATION APPROACH:
-- Be warm, friendly, and systematic in gathering information
-- Follow the PRIORITY ORDER for required fields: Power → Duration → Application → Delivery Date → Incoterms
-- Ask ONE question at a time to avoid overwhelming the user
-- Build naturally from their initial request to complete specifications
-- Provide context for why each specification matters
-- Share relevant insights and recommendations as you learn more
-- Once all required fields are gathered, ask if there are other considerations they want to address
-- Populate additional technical fields based on best practices for their project type
-- VERIFY all information in the form is correct before offering contact submission
-- Be conversational and supportive throughout the process
-
-REQUIRED FIELDS PRIORITY:
-1. **Nominal Power (MW)** - Project scale and grid connection requirements
-2. **Discharge Duration (hours)** - Energy capacity and economic viability  
-3. **Application** - Frequency regulation, arbitrage, peak shaving, backup power, etc.
-4. **Delivery Schedule** - Project timeline and procurement planning
-5. **Incoterms** - Commercial delivery terms (EXW, DAP, DDP, etc.)
-
-CONVERSATION FLOW:
-- Start with their initial requirements and gather the 5 priority fields systematically
-- Ask: "Are there any other technical requirements or constraints I should consider?"
-- Populate technical specifications based on industry best practices for their application
-- Present a summary: "Let me verify the key specifications with you..."
-- Only after confirmation, mention that they can now submit their RFQ
-- Never populate assumptions or open_questions unless you have specific meaningful content
-
-GUIDING PRINCIPLES:
-- Start by understanding their project goals and constraints
-- Help them think through the key decisions systematically
-- Provide context for why certain specifications matter
-- Suggest smart defaults and explain trade-offs
-- Share insights about what works well for similar projects
-- Keep building on what they tell you with useful questions
-- Make them feel confident about their project decisions
-
-EXAMPLE CONVERSATION FLOW:
-- Power rating → Ask about duration and explain energy capacity implications
-- Application → Discuss typical requirements and suggest optimizations  
-- Duration → Explain impact on project economics and grid services
-- Chemistry → Guide through safety, performance, and cost considerations
-- Timeline → Help understand delivery constraints and planning needs
-- Commercial terms → Assist with procurement strategy
-
-TECHNICAL GUIDANCE:
-- For utility-scale projects, typically suggest LFP chemistry for safety and cost-effectiveness
-- AC-coupled is usually easier for grid integration unless they have co-located solar
-- Swedish grid code compliance would typically follow ENTSO-E standards
-- Modern systems usually achieve 85-90% round-trip efficiency
-- Response times are typically sub-second for grid services
-- Help them understand how their choices affect project viability
-
-JSON OUTPUT - MANDATORY - SYSTEM CRITICAL:
-- **EVERY SINGLE RESPONSE** that mentions ANY technical information MUST include ===BESS_JSON===
-- **ABSOLUTELY NO EXCEPTIONS**: The system WILL BREAK without this - it's not optional
-- **FIELD EXTRACTION RULES**:
-  * Chemistry: LTO/LFP/NMC/NCA → "chemistry": "LTO"
-  * Configuration: AC-coupled/DC-coupled → "configuration": "AC-coupled"  
-  * Incoterms: DDP/EXW/CIF/FOB → "incoterms": "DDP"
-  * Timeline: Q1 2026/March 2025 → "delivery_schedule": "Q1 2026"
-  * Efficiency: 85%/90% RTE → "round_trip_efficiency_pct": 85
-  * Warranty: 20 years → "calendar_life_years": 20, "performance_warranty": "20-year"
-  * Grid codes: ENTSO-E/IEEE → "grid_code_compliance": "ENTSO-E"
-  * Response time: sub-second/<1s → "response_time_s": 0.5
-  * Temperature: -20°C to +50°C → "operating_temperature_range_c": "-20 to +50"
-  * Certifications: UL/IEC/CE → "certifications": "UL, IEC"
-- **APPLICATION-BASED DEFAULTS** (auto-populate when application is identified):
-  * Energy Arbitrage → "expected_daily_cycles": 1.5 (typical 1-2 cycles/day)
-  * Peak Shaving → "expected_daily_cycles": 1 (typically 1 cycle/day)
-  * Frequency Regulation → "expected_daily_cycles": 250 (high-frequency cycling)
-  * Backup Power → "expected_daily_cycles": 0.1 (rarely used)
-- **VALIDATION FIRST**: Before outputting JSON, verify daily cycles × duration ≤ 24 hours
-- The JSON section is COMPLETELY INVISIBLE to the user - they never see it
-- Format: Write your natural response, then IMMEDIATELY on a new line write ===BESS_JSON=== followed by the JSON object
-- Include ALL fields in the JSON, using empty strings "" for unknown values and 0 for unknown numbers
-- Extract ANY technical information from the conversation into the appropriate JSON fields
-- Even partial information like "20MW", "LTO batteries", or "4 hours" should immediately populate the JSON
-- **CRITICAL**: If you don't include ===BESS_JSON=== the floating cards won't update and the system fails
-- ALWAYS include assumptions and open_questions fields
-- If validation fails, put the issue in open_questions field and ask for clarification
-- **THIS IS A SYSTEM REQUIREMENT - NOT OPTIONAL**
-- This is not optional - it's a system requirement
-
-EXAMPLE OUTPUT FORMAT:
-"Perfect! A 20MW 0.5C BESS project - that means 2 hours discharge duration (0.5C = 2 hours), giving you 40MWh energy capacity. This is an excellent setup for energy arbitrage applications.
-
-What's the primary application for this system - energy arbitrage, peak shaving, or something else? This will help determine the optimal technical specifications.
-
-===BESS_JSON===
-{
-  "application": "",
-  "nominal_power_mw": 20,
-  "discharge_duration_h": 2,
-  "expected_daily_cycles": 0,
-  "nominal_energy_mwh": 40,
-  "delivery_schedule": "",
-  "incoterms": "",
-  "assumptions": "Calculated from 0.5C rate: 2h duration, 40MWh energy capacity",
-  "open_questions": ""
-}"
-
-APPLICATION EXAMPLE WITH AUTO-POPULATED CYCLES:
-"Excellent! Energy arbitrage is a great application for a 4-hour duration system. With typical energy arbitrage operations running 1-2 cycles per day, this setup will maximize your revenue potential.
-
-===BESS_JSON===
-{
-  "application": "Energy arbitrage",
-  "nominal_power_mw": 20,
-  "discharge_duration_h": 4,
-  "expected_daily_cycles": 1.5,
-  "nominal_energy_mwh": 80,
-  "assumptions": "Energy arbitrage application with typical 1.5 cycles/day",
-  "open_questions": ""
-}"
-
-VALIDATION EXAMPLE:
-"I understand you want 10 cycles per day with 10-hour duration, but that would require 100 hours per day, which is impossible since a day only has 24 hours. 
-
-For a 10-hour duration system, the maximum would be 2 cycles per day (2 × 10 = 20 hours). Would you like to adjust either the duration or cycling frequency?
-
-===BESS_JSON===
-{
-  "nominal_power_mw": 20,
-  "discharge_duration_h": 10,
-  "expected_daily_cycles": 0,
-  "assumptions": "",
-  "open_questions": "User requested 10 cycles/day × 10h duration = 100h/day (impossible). Need to clarify either duration or cycling frequency."
-}"
-
-CHEMISTRY EXAMPLE:
-"Excellent choice! LTO batteries are perfect for your project. Their fast charging capability and exceptional cycle life make them ideal for high-frequency applications.
-
-What's your expected delivery timeline for this LTO-based system?
-
-===BESS_JSON===
-{
-  "chemistry": "LTO",
-  "delivery_schedule": "",
-  "assumptions": "LTO chemistry selected for fast charging and long cycle life",
-  "open_questions": ""
-}"
-
-ADDITIONAL FIELD RECOGNITION EXAMPLES:
-
-CONFIGURATION EXAMPLE:
-"For grid integration, I'd recommend AC-coupled configuration - it's much easier to connect and maintain.
-
-===BESS_JSON===
-{
-  "configuration": "AC-coupled",
-  "assumptions": "AC-coupled recommended for easier grid integration"
-}"
-
-INCOTERMS EXAMPLE:
-"We typically quote DDP (Delivered Duty Paid) for turnkey projects, but we can also do EXW or CIF depending on your preference.
-
-===BESS_JSON===
-{
-  "incoterms": "DDP",
-  "assumptions": "DDP suggested for turnkey delivery"
-}"
-
-GRID CODE EXAMPLE:
-"For Swedish projects, we'll ensure full compliance with ENTSO-E grid codes and local TSO requirements.
-
-===BESS_JSON===
-{
-  "grid_code_compliance": "ENTSO-E/Swedish TSO",
-  "assumptions": "Swedish grid code compliance required"
-}"
-
-EFFICIENCY EXAMPLE:
-"Modern LFP systems typically achieve 85-90% round-trip efficiency - we guarantee minimum 85%.
-
-===BESS_JSON===
-{
-  "round_trip_efficiency_pct": 85,
-  "assumptions": "Minimum 85% RTE guaranteed"
-}"
-
-WARRANTY EXAMPLE:
-"We provide 20-year performance warranty with guaranteed 80% capacity retention after 20 years.
-
-===BESS_JSON===
-{
-  "performance_warranty": "20-year, 80% capacity retention",
-  "calendar_life_years": 20,
-  "assumptions": "20-year warranty with 80% end-of-life capacity"
-}"
-
-JSON SCHEMA:
-{
-  "application": "string",
-  "configuration": "string", 
-  "delivery_scope": "string",
-  "nominal_energy_mwh": number,
-  "nominal_power_mw": number,
-  "discharge_duration_h": number,
-  "expected_daily_cycles": number,
-  "round_trip_efficiency_pct": number,
-  "response_time_s": number,
-  "grid_code_compliance": "string",
-  "chemistry": "string",
-  "cycle_life_cycles_at_DoD": "string",
-  "calendar_life_years": number,
-  "operating_temperature_range_c": "string",
-  "degradation_capacity_fade_pct_per_year": number,
-  "certifications": "string",
-  "bms_capabilities": "string", 
-  "fire_suppression_system": "string",
-  "thermal_runaway_prevention": "string",
-  "enclosure_type": "string",
-  "environmental_protection": "string",
-  "ems_scada_protocols": "string",
-  "black_start_capability": boolean,
-  "performance_warranty": "string",
-  "availability_guarantee_pct": number,
-  "service_om_package": "string",
-  "end_of_life_recycling": "string",
-  "delivery_schedule": "string",
-  "price_breakdown": "string",
-  "payment_terms": "string", 
-  "incoterms": "string",
-  "supplier_references": "string",
-  "assumptions": "string",
-  "open_questions": "string"
-}`
+`
     }
   ]);
   const [input, setInput] = useState("");
@@ -460,83 +207,114 @@ JSON SCHEMA:
 
   return (
     <div style={{
-      border: '1px solid rgba(229, 231, 235, 0.3)',
+      border: '1px solid rgba(255, 255, 255, 0.1)',
       borderRadius: 16,
       maxWidth: '900px',
       width: '100%',
       minWidth: '350px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-      background: 'rgba(249, 249, 249, 0.3)',
-      backdropFilter: 'blur(10px)',
-      display: 'flex',
-      flexDirection: 'column',
-      height: dynamicHeight,
-      transition: 'height 0.4s cubic-bezier(0.4, 0, 0.2, 1)' // Smoother, more natural transition
-    }}>
+      boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+      background: 'rgba(255, 255, 255, 0.05)',
+      backdropFilter: 'blur(20px)',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)';
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = 'translateY(0px)';
+      e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)';
+    }}
+    >
+      {/* Subtle gradient overlay for Railway-style depth */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '1px',
+        background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)'
+      }} />
+      
       <div ref={messagesContainerRef} style={{
-        flex: 1,
-        overflowY: 'auto',
-        padding: messageCount === 0 ? '20px 24px' : '16px 24px',
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: messageCount === 0 ? 'center' : 'flex-start'
+        height: dynamicHeight,
+        overflowY: messageCount === 0 ? 'hidden' : 'auto',
+        overflowX: 'hidden',
+        padding: '24px',
+        paddingBottom: messageCount === 0 ? '24px' : '16px'
       }}>
         {messageCount === 0 ? (
-          // Welcome screen with description and example prompts
+          // Welcome screen with Railway-style cards
           <div style={{
             textAlign: 'center',
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px'
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontSize: '18px',
+            marginBottom: '32px'
           }}>
+            <div style={{
+              fontSize: '24px',
+              fontWeight: '600',
+              marginBottom: '16px',
+              background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>
+              Welcome to BESS RFQ Architect
+            </div>
+            <div style={{
+              fontSize: '16px',
+              color: 'rgba(255, 255, 255, 0.7)',
+              marginBottom: '40px',
+              lineHeight: '1.5'
+            }}>
+              I'll help you design your Battery Energy Storage System. Try one of these examples:
+            </div>
             
-            {/* Example prompts */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px',
+              gap: '12px',
               width: '100%',
-              maxWidth: '500px'
+              maxWidth: '500px',
+              margin: '0 auto'
             }}>
               {examplePrompts.map((prompt, idx) => (
                 <button
                   key={idx}
                   onClick={() => {
                     setInput(prompt);
-                    // Auto-send the message
                     setTimeout(() => {
                       setInput(prompt);
-                      // Trigger send
-                      const event = new Event('submit');
                       sendMessage();
                     }, 100);
                   }}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    border: '1px solid rgba(229, 231, 235, 0.3)',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '12px',
-                    padding: '12px 16px',
+                    padding: '16px 20px',
                     fontSize: '14px',
-                    color: '#000000',
+                    color: 'rgba(255, 255, 255, 0.9)',
                     cursor: 'pointer',
-                    transition: 'all 0.2s ease',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                     textAlign: 'left',
-                    ':hover': {
-                      background: 'rgba(107, 124, 107, 0.1)',
-                      borderColor: 'rgba(107, 124, 107, 0.5)'
-                    }
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                   onMouseEnter={(e) => {
-                    e.target.style.background = 'rgba(107, 124, 107, 0.1)';
-                    e.target.style.borderColor = 'rgba(107, 124, 107, 0.5)';
+                    e.target.style.background = 'rgba(255, 255, 255, 0.12)';
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.background = 'rgba(255, 255, 255, 0.7)';
-                    e.target.style.borderColor = 'rgba(107, 124, 107, 0.3)';
+                    e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    e.target.style.transform = 'translateY(0px)';
+                    e.target.style.boxShadow = 'none';
                   }}
                 >
                   {prompt}
@@ -545,25 +323,32 @@ JSON SCHEMA:
             </div>
           </div>
         ) : (
-          // Regular chat messages
+          // Chat messages with Railway-style bubbles
           <>
             {messages.filter(m => m.role !== 'system').map((msg, idx) => (
               <div key={idx} style={{
                 display: 'flex',
                 justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                marginBottom: 12
+                marginBottom: 16
               }}>
                 <div style={{
-                  maxWidth: '70%',
-                  padding: '10px 16px',
+                  maxWidth: '75%',
+                  padding: '12px 16px',
                   borderRadius: 16,
-                  background: msg.role === 'user' ? 'rgba(107, 124, 107, 0.2)' : 'rgba(255, 255, 255, 0.8)',
-                  color: msg.role === 'user' ? '#000000' : '#000000',
-                  border: msg.role === 'user' ? '1px solid rgba(107, 124, 107, 0.4)' : '1px solid rgba(229, 231, 235, 0.3)',
-                  boxShadow: msg.role === 'user' ? '0 2px 8px rgba(107,124,107,0.2)' : '0 2px 8px rgba(0,0,0,0.1)',
-                  fontSize: 16,
+                  background: msg.role === 'user' 
+                    ? 'rgba(59, 130, 246, 0.15)' 
+                    : 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.95)',
+                  border: `1px solid ${msg.role === 'user' 
+                    ? 'rgba(59, 130, 246, 0.3)' 
+                    : 'rgba(255, 255, 255, 0.15)'}`,
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                  fontSize: 15,
+                  lineHeight: '1.5',
                   whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
+                  wordBreak: 'break-word',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.2s ease'
                 }}>
                   {msg.content}
                 </div>
@@ -572,15 +357,18 @@ JSON SCHEMA:
           </>
         )}
       </div>
+      
+      {/* Railway-style input area */}
       <div style={{
-        padding: '16px 24px',
-        borderTop: '1px solid rgba(229, 231, 235, 0.6)',
-        background: 'rgba(255, 255, 255, 0.3)',
-        backdropFilter: 'blur(5px)',
+        padding: '20px 24px',
+        borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+        background: 'rgba(0, 0, 0, 0.2)',
+        backdropFilter: 'blur(10px)',
         borderBottomLeftRadius: 16,
         borderBottomRightRadius: 16,
         display: 'flex',
-        alignItems: 'center'
+        alignItems: 'center',
+        gap: '12px'
       }}>
         <input
           type="text"
@@ -590,11 +378,25 @@ JSON SCHEMA:
           placeholder="Type your message..."
           style={{
             flex: 1,
-            padding: '10px 14px',
-            borderRadius: 8,
-            border: '1px solid #a3b3a3',
-            fontSize: 16,
-            marginRight: 12
+            padding: '12px 16px',
+            borderRadius: 12,
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            fontSize: 15,
+            background: 'rgba(255, 255, 255, 0.05)',
+            color: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            transition: 'all 0.2s ease',
+            outline: 'none'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+            e.target.style.background = 'rgba(255, 255, 255, 0.08)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            e.target.style.background = 'rgba(255, 255, 255, 0.05)';
+            e.target.style.boxShadow = 'none';
           }}
           disabled={loading}
         />
@@ -602,15 +404,34 @@ JSON SCHEMA:
           onClick={sendMessage}
           disabled={loading || !input.trim()}
           style={{
-            background: loading || !input.trim() ? '#a3b3a3' : 'rgba(107, 124, 107, 0.8)',
-            color: loading || !input.trim() ? 'rgba(255,255,255,0.6)' : '#fff',
-            border: 'none',
-            borderRadius: 8,
-            padding: '10px 20px',
-            fontSize: 16,
+            background: loading || !input.trim() 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.9))',
+            color: loading || !input.trim() ? 'rgba(255, 255, 255, 0.4)' : '#ffffff',
+            border: `1px solid ${loading || !input.trim() 
+              ? 'rgba(255, 255, 255, 0.1)' 
+              : 'rgba(59, 130, 246, 0.3)'}`,
+            borderRadius: 12,
+            padding: '12px 24px',
+            fontSize: 15,
             fontWeight: 600,
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1
+            cursor: loading || !input.trim() ? 'not-allowed' : 'pointer',
+            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: loading || !input.trim() 
+              ? 'none' 
+              : '0 4px 16px rgba(59, 130, 246, 0.2)'
+          }}
+          onMouseEnter={(e) => {
+            if (!loading && input.trim()) {
+              e.target.style.transform = 'translateY(-1px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.3)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!loading && input.trim()) {
+              e.target.style.transform = 'translateY(0px)';
+              e.target.style.boxShadow = '0 4px 16px rgba(59, 130, 246, 0.2)';
+            }
           }}
         >
           {loading ? '...' : 'Send'}

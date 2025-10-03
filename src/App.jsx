@@ -129,23 +129,48 @@ function App() {
           paddingLeft: '20px',
           paddingRight: '20px'
         }}>
-          {/* Instruction/Title Box */}
+          {/* Railway-style Instruction/Title Box */}
           <div style={{
             marginBottom: '20px',
-            padding: '18px 24px',
-            background: 'rgba(249, 249, 249, 0.3)',
-            borderRadius: '20px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(229, 231, 235, 0.3)',
+            padding: '20px 28px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '16px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             maxWidth: '900px',
-            width: '90%'
-          }}>
+            width: '90%',
+            position: 'relative',
+            overflow: 'hidden',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0px)';
+            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)';
+          }}
+          >
+            {/* Subtle top gradient for Railway effect */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '1px',
+              background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)'
+            }} />
+            
             <h2 style={{
               margin: '0 0 8px 0',
               fontSize: '28px',
-              fontWeight: '700',
-              color: '#000000',
+              fontWeight: '600',
+              background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
               textAlign: 'center',
               lineHeight: '1.2'
             }}>
@@ -154,24 +179,26 @@ function App() {
             <p style={{
               margin: '0',
               fontSize: '16px',
-              color: '#000000',
+              color: 'rgba(255, 255, 255, 0.7)',
               textAlign: 'center',
-              lineHeight: '1.4',
-              opacity: '0.8'
+              lineHeight: '1.4'
             }}>
               Describe your Battery Energy Storage System requirements and get instant specifications
             </p>
           </div>
 
-          {/* Session ID Display */}
+          {/* Railway-style Session ID Display */}
           <div style={{
             fontSize: '12px',
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: 'rgba(255, 255, 255, 0.5)',
             marginBottom: '15px',
-            fontFamily: 'monospace',
-            backgroundColor: 'rgba(0, 0, 0, 0.2)',
-            padding: '4px 8px',
-            borderRadius: '4px'
+            fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(10px)',
+            padding: '6px 12px',
+            borderRadius: '8px',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'inline-block'
           }}>
             Session: {sessionId.split('_')[1]}
           </div>
