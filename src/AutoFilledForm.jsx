@@ -632,9 +632,9 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                 className="contact-form-grid"
                 style={{ 
                   display: 'grid', 
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-                  gap: '16px', 
-                  marginBottom: '16px' 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+                  gap: '20px', 
+                  marginBottom: '20px' 
                 }}>
                 {/* Contact Email */}
                 <div>
@@ -654,6 +654,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
+                      boxSizing: 'border-box',
                       background: 'rgba(255, 255, 255, 0.1)',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '12px',
@@ -698,6 +699,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
+                      boxSizing: 'border-box',
                       background: 'rgba(255, 255, 255, 0.1)',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '12px',
@@ -742,6 +744,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
+                      boxSizing: 'border-box',
                       background: 'rgba(255, 255, 255, 0.1)',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '12px',
@@ -786,6 +789,7 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
                     required
                     style={{
                       width: '100%',
+                      boxSizing: 'border-box',
                       background: 'rgba(255, 255, 255, 0.1)',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '12px',
