@@ -1,18 +1,82 @@
 import React, { useState, useEffect } from 'react';
+import aggregationService from '../services/aggregationService';
 
 const AggregationAnalytics = ({ sessionId }) => {
   const [analytics, setAnalytics] = useState({
-    totalProjects: 123,
-    totalMW: 2180,
-    totalMWh: 5600, // 5.6 GWh - positioned to show around €97
+    totalProjects: 0,
+    totalMW: 0,
+    totalMWh: 0,
     projectsByDuration: {
-      '1h': 41,
-      '2h': 38,
-      '4h': 29,
-      '8h': 15
+      '1h': 0,
+      '2h': 0,
+      '4h': 0,
+      '8h': 0
     },
-    currentAggregation: 5.6 // 5.6 GWh - should show around €97 on the curve
+    currentAggregation: 0,
+    lastUpdated: null
   });
+
+  const [historicalTrends, setHistoricalTrends] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Load initial data and subscribe to updates
+  useEffect(() => {
+    let unsubscribe;
+
+    const initializeData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Load current aggregation data
+        const currentData = await aggregationService.getCurrentAggregation();
+        setAnalytics(currentData);
+        
+        // Load historical trends
+        const trends = await aggregationService.getHistoricalTrends('30d');
+        setHistoricalTrends(trends);
+        
+        // Subscribe to live updates
+        unsubscribe = aggregationService.subscribe((newData) => {
+          setAnalytics(prev => ({
+            ...prev,
+            ...newData,
+            lastUpdated: new Date().toISOString()
+          }));
+        });
+        
+        setError(null);
+      } catch (err) {
+        console.error('Error initializing aggregation data:', err);
+        setError('Failed to load aggregation data');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
+
+    // Cleanup subscription on unmount
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
+
+  // Refresh historical data periodically
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const trends = await aggregationService.getHistoricalTrends('30d');
+        setHistoricalTrends(trends);
+      } catch (err) {
+        console.error('Error refreshing historical trends:', err);
+      }
+    }, 300000); // Every 5 minutes
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Price curve calculation: realistic stepped curve matching the provided graph
   const calculatePrice = (aggregationGWh) => {
@@ -52,27 +116,61 @@ const AggregationAnalytics = ({ sessionId }) => {
         backdropFilter: 'blur(20px)',
         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
       }}>
-        <h3 style={{
-          background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          fontSize: '18px',
-          fontWeight: '600',
-          margin: '0 0 10px 0',
-          textAlign: 'center'
-        }}>
-          Market Aggregation
-        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <h3 style={{
+            background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text',
+            fontSize: '18px',
+            fontWeight: '600',
+            margin: 0
+          }}>
+            Market Aggregation
+          </h3>
+          
+          {/* Real-time status indicator */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <div style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: isLoading ? 'rgba(255, 193, 7, 0.8)' : error ? 'rgba(220, 53, 69, 0.8)' : 'rgba(40, 167, 69, 0.8)',
+              boxShadow: `0 0 6px ${isLoading ? 'rgba(255, 193, 7, 0.6)' : error ? 'rgba(220, 53, 69, 0.6)' : 'rgba(40, 167, 69, 0.6)'}`
+            }} />
+            <span style={{
+              color: 'rgba(255, 255, 255, 0.6)',
+              fontSize: '10px',
+              fontWeight: '500'
+            }}>
+              {isLoading ? 'Loading...' : error ? 'Offline' : 'Live'}
+            </span>
+          </div>
+        </div>
+        
         <p style={{
           color: 'rgba(255, 255, 255, 0.7)',
           fontSize: '12px',
-          textAlign: 'center',
           margin: 0,
           lineHeight: '1.4'
         }}>
           Real-time project aggregation driving economies of scale
         </p>
+        
+        {analytics.lastUpdated && (
+          <p style={{
+            color: 'rgba(255, 255, 255, 0.5)',
+            fontSize: '10px',
+            margin: '8px 0 0 0',
+            lineHeight: '1.2'
+          }}>
+            Last updated: {new Date(analytics.lastUpdated).toLocaleTimeString()}
+          </p>
+        )}
       </div>
 
       {/* Statistics Cards */}
@@ -156,22 +254,23 @@ const AggregationAnalytics = ({ sessionId }) => {
         ))}
       </div>
 
-      {/* Price Curve Chart */}
+      {/* Price Curve Chart - Large and at top */}
       <div style={{
-        flex: 1,
         background: 'rgba(255, 255, 255, 0.05)',
         borderRadius: '12px',
-        padding: '16px',
+        padding: '20px',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         backdropFilter: 'blur(20px)',
+        marginBottom: '20px',
+        height: '400px', // Large height similar to chat window
         display: 'flex',
         flexDirection: 'column'
       }}>
         <h4 style={{
           color: 'rgba(255, 255, 255, 0.9)',
-          fontSize: '14px',
+          fontSize: '16px',
           fontWeight: '600',
-          margin: '0 0 16px 0'
+          margin: '0 0 20px 0'
         }}>
           Economies of Scale
         </h4>
@@ -179,7 +278,7 @@ const AggregationAnalytics = ({ sessionId }) => {
         <div style={{
           flex: 1,
           position: 'relative',
-          minHeight: '200px'
+          minHeight: '320px'
         }}>
           <PriceCurveChart 
             currentAggregation={analytics.currentAggregation}
@@ -195,7 +294,7 @@ const AggregationAnalytics = ({ sessionId }) => {
           borderRadius: '8px',
           border: '1px solid rgba(59, 130, 246, 0.2)'
         }}>
-          <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '11px', textAlign: 'center' }}>
+          <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '12px', textAlign: 'center' }}>
             Current: {analytics.currentAggregation.toFixed(1)} GWh → €{Math.round(currentPrice)}/kWh
           </div>
         </div>
@@ -233,22 +332,23 @@ const StatCard = ({ title, value, icon }) => (
 );
 
 const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) => {
-  const width = 280;
-  const height = 180;
-  const margin = { top: 20, right: 30, bottom: 30, left: 50 };
+  const width = 320; // Much larger width
+  const height = 280; // Much larger height
+  const margin = { top: 20, right: 40, bottom: 40, left: 60 }; // More margin for labels
   const chartWidth = width - margin.left - margin.right;
   const chartHeight = height - margin.top - margin.bottom;
 
-  // Generate curve points
+  // Generate curve points starting from 0
   const generateCurvePoints = () => {
     const points = [];
     for (let i = 0; i <= 200; i++) { // More points for smoother curve
       const x = (i / 200) * 16; // 0 to 16 GWh
       const aggregationMWh = x * 1000;
       
-      // Use the same realistic price calculation
+      // Use the same realistic price calculation but start from 0
       let price;
-      if (aggregationMWh <= 10) price = 210;
+      if (aggregationMWh <= 0) price = 210; // Start at 210 for 0 MWh
+      else if (aggregationMWh <= 10) price = 210;
       else if (aggregationMWh <= 100) price = 210 - ((aggregationMWh - 10) / 90) * 60;
       else if (aggregationMWh <= 500) price = 150 - ((aggregationMWh - 100) / 400) * 35;
       else if (aggregationMWh <= 1500) price = 115 - ((aggregationMWh - 500) / 1000) * 20;
@@ -260,7 +360,7 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
       else price = 27;
       
       const xPos = (x / 16) * chartWidth;
-      const yPos = chartHeight - ((price - 27) / (210 - 27)) * chartHeight;
+      const yPos = chartHeight - ((price - 0) / (210 - 0)) * chartHeight; // Start from 0 instead of 27
       points.push({ x: xPos, y: yPos, price, aggregation: x });
     }
     return points;
@@ -273,7 +373,7 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
 
   // Current position
   const currentX = (currentAggregation / 16) * chartWidth;
-  const currentY = chartHeight - ((currentPrice - 27) / (251 - 27)) * chartHeight;
+  const currentY = chartHeight - ((currentPrice - 0) / (210 - 0)) * chartHeight; // Use zero-based scale
 
   return (
     <div style={{ 
@@ -396,16 +496,19 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
           strokeDasharray="2,2"
         />
         
-        {/* Y-axis labels */}
-        <text x={margin.left - 10} y={margin.top + 5} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€210</text>
-        <text x={margin.left - 10} y={margin.top + chartHeight/4} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€150</text>
-        <text x={margin.left - 10} y={margin.top + chartHeight/2} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€95</text>
-        <text x={margin.left - 10} y={margin.top + 3*chartHeight/4} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€60</text>
-        <text x={margin.left - 10} y={margin.top + chartHeight} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€27</text>
+        {/* Y-axis labels - zero-based scale */}
+        <text x={margin.left - 10} y={margin.top + 5} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="end">€210</text>
+        <text x={margin.left - 10} y={margin.top + chartHeight/4} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="end">€160</text>
+        <text x={margin.left - 10} y={margin.top + chartHeight/2} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="end">€105</text>
+        <text x={margin.left - 10} y={margin.top + 3*chartHeight/4} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="end">€50</text>
+        <text x={margin.left - 10} y={margin.top + chartHeight} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="end">€0</text>
         
-        {/* X-axis labels */}
-        <text x={margin.left} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="start">0</text>
-        <text x={margin.left + chartWidth} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">16 GWh</text>
+        {/* X-axis labels - zero-based scale */}
+        <text x={margin.left} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="start">0</text>
+        <text x={margin.left + chartWidth/4} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="middle">4</text>
+        <text x={margin.left + chartWidth/2} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="middle">8</text>
+        <text x={margin.left + 3*chartWidth/4} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="middle">12</text>
+        <text x={margin.left + chartWidth} y={height - 5} fill="rgba(255, 255, 255, 0.6)" fontSize="11" textAnchor="end">16 GWh</text>
         
         {/* Axis labels */}
         <text x={margin.left - 35} y={margin.top + chartHeight/2} fill="rgba(255, 255, 255, 0.7)" fontSize="9" textAnchor="middle" transform={`rotate(-90, ${margin.left - 35}, ${margin.top + chartHeight/2})`}>€/kWh</text>
