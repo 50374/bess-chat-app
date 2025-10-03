@@ -1028,32 +1028,31 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
         {/* Conditional Assumptions Card */}
         {showAssumptions && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(252, 252, 250, 0.9) 100%)',
-            backdropFilter: 'blur(12px)',
-            borderRadius: 14,
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 16,
             padding: '18px 22px',
             marginBottom: 16,
-            boxShadow: '0 3px 12px rgba(45, 52, 40, 0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-            border: '1px solid rgba(122, 138, 110, 0.25)',
-            transition: 'all 0.3s ease',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             animation: 'expandCard 0.5s ease-out',
             transformOrigin: 'center'
           }}>
             <div style={{
               fontSize: 13,
               fontWeight: 700,
-              color: '#2d3428',
+              color: 'rgba(255, 255, 255, 0.7)',
               marginBottom: 7,
               textTransform: 'uppercase',
-              letterSpacing: '0.8px',
-              textShadow: '0 1px 1px rgba(255,255,255,0.6)'
+              letterSpacing: '0.8px'
             }}>
               Assumptions
             </div>
             <div style={{
               fontSize: 15,
-              color: '#1a1f1a',
-              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.95)',
+              fontWeight: 500,
               lineHeight: 1.5
             }}>
               {form.assumptions}
@@ -1064,32 +1063,31 @@ const AutoFilledForm = ({ extractedInfo, onSubmit, onRequestMissingFields, rende
         {/* Conditional Open Questions Card */}
         {showOpenQuestions && (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(252, 252, 250, 0.9) 100%)',
-            backdropFilter: 'blur(12px)',
-            borderRadius: 14,
+            background: 'rgba(255, 255, 255, 0.1)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 16,
             padding: '18px 22px',
             marginBottom: 16,
-            boxShadow: '0 3px 12px rgba(45, 52, 40, 0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
-            border: '1px solid rgba(122, 138, 110, 0.25)',
-            transition: 'all 0.3s ease',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
             animation: 'expandCard 0.5s ease-out',
             transformOrigin: 'center'
           }}>
             <div style={{
               fontSize: 13,
               fontWeight: 700,
-              color: '#2d3428',
+              color: 'rgba(255, 255, 255, 0.7)',
               marginBottom: 7,
               textTransform: 'uppercase',
-              letterSpacing: '0.8px',
-              textShadow: '0 1px 1px rgba(255,255,255,0.6)'
+              letterSpacing: '0.8px'
             }}>
               Open Questions
             </div>
             <div style={{
               fontSize: 15,
-              color: '#1a1f1a',
-              fontWeight: 600,
+              color: 'rgba(255, 255, 255, 0.95)',
+              fontWeight: 500,
               lineHeight: 1.5
             }}>
               {form.open_questions}

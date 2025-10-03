@@ -96,21 +96,34 @@ function App() {
   }, []);
 
   return (
-    <UltraGradientBackground
-      speed={0.08}
-      opacity={1}
-      palette={["#0a0f1c", "#1a2332", "#2d1b3e", "#3e2a47"]} 
-      quality="med"
-      blobs={4}
-      bandStrength={0.0}
-    >
+    <div style={{ position: 'relative', width: '100vw', minHeight: '100vh' }}>
+      {/* Fixed background with parallax effect */}
       <div style={{
-        minHeight: '100vh',
-        height: '100vh',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '120vh', // Overdimensioned for parallax
+        zIndex: -1
+      }}>
+        <UltraGradientBackground
+          speed={0.08}
+          opacity={1}
+          palette={["#0a0f1c", "#1a2332", "#2d1b3e", "#3e2a47"]} 
+          quality="med"
+          blobs={4}
+          bandStrength={0.0}
+        />
+      </div>
+      
+      {/* Scrollable content */}
+      <div style={{
+        minHeight: '150vh', // Make content taller to enable scrolling
         display: 'flex',
         flexDirection: 'row',
         width: '100vw',
-        overflow: 'hidden'
+        position: 'relative',
+        zIndex: 1
       }}>
         {/* Left empty container for centering */}
         <div style={{ flex: 1 }} />
@@ -122,10 +135,9 @@ function App() {
           flexDirection: 'column',
           justifyContent: 'flex-start', 
           alignItems: 'center',
-          height: '100vh',
-          overflow: 'auto',
+          minHeight: '100vh',
           paddingTop: '4vh',
-          paddingBottom: '2vh',
+          paddingBottom: '4vh',
           paddingLeft: '20px',
           paddingRight: '20px'
         }}>
@@ -226,17 +238,17 @@ function App() {
         {/* Right side panel for BESS summary cards when available */}
         <div style={{ 
           flex: 1, 
-          padding: '4vh 20px 2vh 20px',
+          padding: '4vh 20px 4vh 20px',
           display: 'flex',
           justifyContent: 'flex-start',
-          alignItems: 'flex-start'
+          alignItems: 'flex-start',
+          minHeight: '100vh'
         }}>
           <div style={{
             width: '100%',
             maxWidth: '400px',
-            height: 'calc(100vh - 8vh)',
-            overflowY: 'auto',
-            overflowX: 'hidden'
+            minHeight: '100vh',
+            paddingBottom: '40px'
           }}>
             {extractedInfo && (
               <AutoFilledForm 
@@ -249,7 +261,7 @@ function App() {
           </div>
         </div>
       </div>
-    </UltraGradientBackground>
+    </div>
   );
 }
 
