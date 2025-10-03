@@ -2,32 +2,34 @@ import React, { useState, useEffect } from 'react';
 
 const AggregationAnalytics = ({ sessionId }) => {
   const [analytics, setAnalytics] = useState({
-    totalProjects: 247,
-    totalMW: 3420,
-    totalMWh: 9850,
+    totalProjects: 156,
+    totalMW: 2840,
+    totalMWh: 7200, // 7.2 GWh - positioned in the middle of your curve
     projectsByDuration: {
-      '1h': 89,
-      '2h': 76,
-      '4h': 58,
-      '8h': 24
+      '1h': 52,
+      '2h': 48,
+      '4h': 38,
+      '8h': 18
     },
-    currentAggregation: 9.85 // in GWh
+    currentAggregation: 7.2 // 7.2 GWh - should show around €70-80 on your curve
   });
 
-  // Price curve calculation: exponential decay from €251 to €27
+  // Price curve calculation: realistic stepped curve matching the provided graph
   const calculatePrice = (aggregationGWh) => {
-    const minPrice = 27;
-    const maxPrice = 251;
-    const maxAggregation = 16; // GWh
-    const minAggregation = 0.01; // GWh
+    const aggregationMWh = aggregationGWh * 1000; // Convert to MWh for calculation
     
-    if (aggregationGWh <= minAggregation) return maxPrice;
-    if (aggregationGWh >= maxAggregation) return minPrice;
+    // Realistic price curve based on the provided graph
+    if (aggregationMWh <= 10) return 210;
+    if (aggregationMWh <= 100) return 210 - ((aggregationMWh - 10) / 90) * 60; // Drop to 150
+    if (aggregationMWh <= 500) return 150 - ((aggregationMWh - 100) / 400) * 35; // Drop to 115
+    if (aggregationMWh <= 1500) return 115 - ((aggregationMWh - 500) / 1000) * 20; // Drop to 95
+    if (aggregationMWh <= 3000) return 95 - ((aggregationMWh - 1500) / 1500) * 5; // Small drop to 90
+    if (aggregationMWh <= 6000) return 90 + ((aggregationMWh - 3000) / 3000) * 10; // Slight increase to 100 (plateau)
+    if (aggregationMWh <= 8000) return 100 - ((aggregationMWh - 6000) / 2000) * 5; // Drop to 95
+    if (aggregationMWh <= 12000) return 95 - ((aggregationMWh - 8000) / 4000) * 25; // Drop to 70
+    if (aggregationMWh <= 16000) return 70 - ((aggregationMWh - 12000) / 4000) * 43; // Final drop to 27
     
-    // Exponential decay formula
-    const normalizedPosition = (aggregationGWh - minAggregation) / (maxAggregation - minAggregation);
-    const decayFactor = Math.pow(normalizedPosition, 0.3); // Adjust curve shape
-    return maxPrice - ((maxPrice - minPrice) * decayFactor);
+    return 27; // Minimum price at full aggregation
   };
 
   const currentPrice = calculatePrice(analytics.currentAggregation);
@@ -240,11 +242,25 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
   // Generate curve points
   const generateCurvePoints = () => {
     const points = [];
-    for (let i = 0; i <= 100; i++) {
-      const x = (i / 100) * 16; // 0 to 16 GWh
-      const price = 27 + (251 - 27) * Math.pow((16 - x) / 16, 3); // Exponential decay
+    for (let i = 0; i <= 200; i++) { // More points for smoother curve
+      const x = (i / 200) * 16; // 0 to 16 GWh
+      const aggregationMWh = x * 1000;
+      
+      // Use the same realistic price calculation
+      let price;
+      if (aggregationMWh <= 10) price = 210;
+      else if (aggregationMWh <= 100) price = 210 - ((aggregationMWh - 10) / 90) * 60;
+      else if (aggregationMWh <= 500) price = 150 - ((aggregationMWh - 100) / 400) * 35;
+      else if (aggregationMWh <= 1500) price = 115 - ((aggregationMWh - 500) / 1000) * 20;
+      else if (aggregationMWh <= 3000) price = 95 - ((aggregationMWh - 1500) / 1500) * 5;
+      else if (aggregationMWh <= 6000) price = 90 + ((aggregationMWh - 3000) / 3000) * 10;
+      else if (aggregationMWh <= 8000) price = 100 - ((aggregationMWh - 6000) / 2000) * 5;
+      else if (aggregationMWh <= 12000) price = 95 - ((aggregationMWh - 8000) / 4000) * 25;
+      else if (aggregationMWh <= 16000) price = 70 - ((aggregationMWh - 12000) / 4000) * 43;
+      else price = 27;
+      
       const xPos = (x / 16) * chartWidth;
-      const yPos = chartHeight - ((price - 27) / (251 - 27)) * chartHeight;
+      const yPos = chartHeight - ((price - 27) / (210 - 27)) * chartHeight;
       points.push({ x: xPos, y: yPos, price, aggregation: x });
     }
     return points;
@@ -337,7 +353,10 @@ const PriceCurveChart = ({ currentAggregation, currentPrice, fillPercentage }) =
         />
         
         {/* Y-axis labels */}
-        <text x={margin.left - 10} y={margin.top + 5} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€251</text>
+        <text x={margin.left - 10} y={margin.top + 5} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€210</text>
+        <text x={margin.left - 10} y={margin.top + chartHeight/4} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€150</text>
+        <text x={margin.left - 10} y={margin.top + chartHeight/2} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€95</text>
+        <text x={margin.left - 10} y={margin.top + 3*chartHeight/4} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€60</text>
         <text x={margin.left - 10} y={margin.top + chartHeight} fill="rgba(255, 255, 255, 0.6)" fontSize="10" textAnchor="end">€27</text>
         
         {/* X-axis labels */}
