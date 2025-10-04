@@ -576,9 +576,24 @@ app.post('/api/optimization', async (req, res) => {
     console.log('Expected Chat Assistant ID: asst_gkRgQtlA0WWreiRl3y6acyGC');
     console.log('🚨🚨🚨 END CRITICAL DEBUG 🚨🚨🚨');
 
-    // Natural language prompt similar to successful test format
+    // Enhanced natural language prompt with more context
     const duration = projectData.discharge_duration_h || (projectData.nominal_energy_mwh / projectData.nominal_power_mw);
-    const optimizationPrompt = `Hi! Can you recommend some products for a BESS project that is ${projectData.nominal_power_mw}MW ${duration} hours duration and used for ${projectData.application}? We will be cycling it ${projectData.expected_daily_cycles} times daily. The project delivery is needed for ${projectData.delivery_schedule} with ${projectData.incoterms} terms.`;
+    const optimizationPrompt = `Hi! Can you recommend some products for a BESS project that is ${projectData.nominal_power_mw}MW ${duration} hours duration and used for ${projectData.application}? 
+    
+Project Requirements:
+- Power: ${projectData.nominal_power_mw}MW AC
+- Energy: ${projectData.nominal_energy_mwh}MWh
+- Duration: ${duration} hours
+- Daily Cycles: ${projectData.expected_daily_cycles} cycles per day
+- Application: ${projectData.application}
+- Delivery: ${projectData.delivery_schedule}
+- Terms: ${projectData.incoterms}
+- Grid Voltage: 400V (typical utility scale)
+- Operating Temperature: -20°C to +50°C
+- Standards Required: UL9540, UL1973, IEEE 1547
+- Warranty: 20 years preferred
+
+Please provide specific product recommendations with manufacturers, model numbers, container counts, and PDF source references.`;
 
     console.log('🤖 Creating thread for optimization...');
     
