@@ -4,7 +4,7 @@ import AutoFilledForm from './AutoFilledForm';
 import UltraGradientBackground from './components/UltraGradientBackground';
 import AggregationAnalytics from './components/AggregationAnalytics';
 import OptimizationResults from './components/OptimizationResults';
-import MarketDemandDiagram from './components/MarketDemandDiagram';
+
 import FloatingProjectCards from './components/FloatingProjectCards';
 import { apiService } from './services/api.js';
 
@@ -180,24 +180,23 @@ function App() {
         boxSizing: 'border-box'
       }}>
         
-        {/* Left Panel: Market Demand Diagram & Statistics */}
+        {/* Left Panel: Market Statistics Only */}
         <div style={{
           flex: '0 0 300px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px'
+          alignItems: 'flex-start'
         }}>
-          <MarketDemandDiagram data={marketData} />
           <AggregationAnalytics data={marketData} realTime={true} />
         </div>
 
-        {/* Center Panel: Chat Window */}
+        {/* Center Panel: Chat Window + Optimization Results */}
         <div style={{
           flex: '1',
           minWidth: '400px',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
+          flexDirection: 'column',
+          alignItems: 'flex-start'
         }}>
           <div style={{ width: '100%', maxWidth: '600px' }}>
             <ChatWindow
@@ -208,30 +207,35 @@ function App() {
               sessionId={sessionId}
             />
           </div>
-        </div>
-
-        {/* Right Panel: Floating Project Cards & Optimization */}
-        <div style={{
-          flex: '0 0 350px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '20px'
-        }}>
-          <FloatingProjectCards
-            extractedInfo={extractedInfo}
-            projectData={projectData}
-            onDataUpdate={handleProjectDataUpdate}
-            onOptimize={handleOptimizationRequest}
-            isOptimizeEnabled={isOptimizeEnabled}
-          />
           
+          {/* Optimization Results Below Chat */}
           {optimizationResults && (
-            <OptimizationResults 
-              results={optimizationResults}
-              projectRequirements={projectData}
-            />
+            <div style={{ width: '100%', maxWidth: '600px', marginTop: '20px' }}>
+              <OptimizationResults 
+                results={optimizationResults}
+                projectRequirements={projectData}
+              />
+            </div>
           )}
         </div>
+
+        {/* Right Panel: Floating Project Cards (Only When Populated) */}
+        {(extractedInfo && Object.keys(extractedInfo).length > 0) && (
+          <div style={{
+            flex: '0 0 350px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start'
+          }}>
+            <FloatingProjectCards
+              extractedInfo={extractedInfo}
+              projectData={projectData}
+              onDataUpdate={handleProjectDataUpdate}
+              onOptimize={handleOptimizationRequest}
+              isOptimizeEnabled={isOptimizeEnabled}
+            />
+          </div>
+        )}
       </div>
 
       {/* Step 4: Submission Popup */}
@@ -256,59 +260,132 @@ function App() {
             border: '1px solid rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(30px)',
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-            textAlign: 'center',
-            maxWidth: '500px'
+            maxWidth: '500px',
+            width: '90%'
           }}>
             <h2 style={{
-              color: 'rgba(255, 255, 255, 0.95)',
+              color: 'white',
               fontSize: '24px',
-              fontWeight: '600',
-              margin: '0 0 16px 0'
+              fontWeight: '700',
+              margin: '0 0 16px 0',
+              textAlign: 'center'
             }}>
-              🎯 Great! Your BESS has been optimized
+              🎯 Submit Your BESS Project
             </h2>
             <p style={{
               color: 'rgba(255, 255, 255, 0.8)',
               fontSize: '16px',
               margin: '0 0 24px 0',
-              lineHeight: '1.5'
+              lineHeight: '1.5',
+              textAlign: 'center'
             }}>
-              Submit your project to our market aggregation database to:
-              <br />• Get matched with other projects
-              <br />• Access bulk pricing opportunities  
-              <br />• Connect with verified suppliers
+              Get access to bulk pricing, supplier matching, and market aggregation opportunities
             </p>
-            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
-              <button
-                onClick={() => handleProjectSubmission(extractedInfo)}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(21, 128, 61, 0.8))',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '12px 24px',
-                  color: 'white',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                Submit Project
-              </button>
-              <button
-                onClick={() => setShowSubmissionPopup(false)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  borderRadius: '12px',
-                  padding: '12px 24px',
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '16px',
-                  cursor: 'pointer'
-                }}
-              >
-                Maybe Later
-              </button>
-            </div>
+            
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const userDetails = {
+                contact_person: formData.get('name'),
+                company_name: formData.get('company'),
+                contact_email: formData.get('email'),
+                project_name: formData.get('projectName'),
+                ...extractedInfo  // Include the extracted project data
+              };
+              handleProjectSubmission(userDetails);
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <input
+                  name="name"
+                  type="text"
+                  placeholder="Your Name *"
+                  required
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                />
+                <input
+                  name="company"
+                  type="text"
+                  placeholder="Company Name *"
+                  required
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                />
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Email Address *"
+                  required
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                />
+                <input
+                  name="projectName"
+                  type="text"
+                  placeholder="Project Name *"
+                  required
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    padding: '12px',
+                    color: 'white',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
+              
+              <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '24px' }}>
+                <button
+                  type="submit"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(21, 128, 61, 0.8))',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '12px 24px',
+                    color: 'white',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Submit Project
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowSubmissionPopup(false)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    borderRadius: '12px',
+                    padding: '12px 24px',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '16px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
