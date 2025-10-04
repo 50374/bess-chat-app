@@ -1,5 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -417,6 +421,169 @@ Please provide detailed product recommendations with exact model numbers, quanti
       success: false,
       error: error.message,
       message: "Failed to generate product recommendation. Please try again."
+    });
+  }
+});
+
+// BESS Optimization endpoint - using OpenAI Assistant for secure optimization
+app.post('/api/optimization', async (req, res) => {
+  console.log('🎯 BESS optimization request received');
+  
+  try {
+    const { projectData, sessionId } = req.body;
+    console.log('📊 Project data for optimization:', projectData);
+    
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('OpenAI API key not configured');
+    }
+
+    const assistantId = process.env.OPENAI_ASSISTANT_ID || 'asst_gkRgQtlA0WWreiRl3y6acyGC';
+
+    // Create optimization prompt from project data
+    const optimizationPrompt = `Please optimize this BESS configuration:
+
+PROJECT REQUIREMENTS:
+${Object.entries(projectData)
+  .filter(([key, value]) => value && value !== '' && value !== 0 && value !== false)
+  .map(([key, value]) => `• ${key}: ${value}`)
+  .join('\n')}
+
+Please provide a comprehensive optimization analysis with:
+1. System Overview (recommended configuration)
+2. Technical Specifications (detailed specs)
+3. Economic Analysis (cost breakdown, ROI projections)  
+4. Implementation Recommendations (next steps)
+
+Format as structured sections with clear headings for easy parsing.`;
+
+    console.log('🤖 Creating thread for optimization...');
+    
+    // Create thread
+    const threadResponse = await fetch('https://api.openai.com/v1/threads', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({})
+    });
+
+    if (!threadResponse.ok) {
+      throw new Error(`Failed to create thread: ${threadResponse.status}`);
+    }
+
+    const thread = await threadResponse.json();
+    console.log('📝 Thread created:', thread.id);
+
+    // Add message to thread
+    await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        role: 'user',
+        content: optimizationPrompt
+      })
+    });
+
+    console.log('🚀 Running optimization assistant...');
+    
+    // Run assistant
+    const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+        'OpenAI-Beta': 'assistants=v2'
+      },
+      body: JSON.stringify({
+        assistant_id: assistantId
+      })
+    });
+
+    if (!runResponse.ok) {
+      throw new Error(`Failed to run optimization assistant: ${runResponse.status}`);
+    }
+
+    const run = await runResponse.json();
+    console.log('⏳ Waiting for optimization completion...');
+
+    // Poll for completion
+    let runStatus = run;
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    while ((runStatus.status === 'in_progress' || runStatus.status === 'queued') && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      attempts++;
+      
+      const statusResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs/${run.id}`, {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'OpenAI-Beta': 'assistants=v2'
+        }
+      });
+      
+      if (!statusResponse.ok) {
+        throw new Error(`Failed to check run status: ${statusResponse.status}`);
+      }
+      
+      runStatus = await statusResponse.json();
+      console.log(`🔄 Status: ${runStatus.status} (attempt ${attempts}/${maxAttempts})`);
+    }
+
+    if (runStatus.status !== 'completed') {
+      throw new Error(`Optimization failed with status: ${runStatus.status}`);
+    }
+
+    // Get the optimization results
+    const messagesResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/messages`, {
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'OpenAI-Beta': 'assistants=v2'
+      }
+    });
+
+    if (!messagesResponse.ok) {
+      throw new Error(`Failed to get messages: ${messagesResponse.status}`);
+    }
+
+    const messages = await messagesResponse.json();
+    const optimizationMessage = messages.data.find(msg => msg.role === 'assistant');
+    
+    if (!optimizationMessage) {
+      throw new Error('No optimization response found');
+    }
+
+    const messageContent = optimizationMessage.content[0];
+    const optimization = messageContent.type === 'text' 
+      ? messageContent.text.value 
+      : 'Unable to generate optimization';
+
+    console.log('✅ Optimization completed successfully');
+
+    res.json({
+      success: true,
+      data: {
+        optimization,
+        result: optimization, // For compatibility
+        sessionId,
+        threadId: thread.id,
+        runId: run.id,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Optimization error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      message: "Failed to optimize BESS configuration. Please try again."
     });
   }
 });

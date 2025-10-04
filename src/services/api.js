@@ -266,5 +266,47 @@ export const apiService = {
     const max = Math.max(...powerValues)
     
     return { average: avg.toFixed(2), min, max }
+  },
+
+  // Step 3: Get optimization recommendations using OpenAI Assistant (via backend)
+  async getOptimization(projectData, sessionId = null) {
+    try {
+      console.log('🎯 Step 3: Getting optimization for:', projectData);
+      
+      // Call our secure backend API instead of OpenAI directly
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      
+      const response = await fetch(`${apiUrl}/api/optimization`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectData,
+          sessionId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend API error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Optimization completed via backend');
+
+      return {
+        success: true, 
+        data: {
+          result: result.optimization || result.result || result,
+          timestamp: new Date().toISOString(),
+          projectData,
+          sessionId
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Optimization failed:', error);
+      return { success: false, error: error.message };
+    }
   }
 }
