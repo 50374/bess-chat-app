@@ -623,7 +623,7 @@ Please return only the JSON response per your schema.`;
 
     console.log('🚀 Running optimization assistant...');
     
-    // Run assistant
+    // Run assistant with JSON response format to get structured BESS configuration
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
       method: 'POST',
       headers: {
@@ -632,7 +632,8 @@ Please return only the JSON response per your schema.`;
         'OpenAI-Beta': 'assistants=v2'
       },
       body: JSON.stringify({
-        assistant_id: assistantId
+        assistant_id: assistantId,
+        response_format: { type: "json_object" }
       })
     });
 
