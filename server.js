@@ -554,7 +554,9 @@ Please provide detailed product recommendations with exact model numbers, quanti
 // BESS Optimization endpoint - using OpenAI Assistant for secure optimization
 app.post('/api/optimization', async (req, res) => {
   console.log('🎯 BESS optimization request received');
-  console.log('🔧 Debug: Server version with assistant ID logging active');
+  console.log('='.repeat(80));
+  console.log('🚨 DEBUG VERSION ACTIVE - CHECKING ASSISTANT ID');
+  console.log('='.repeat(80));
   
   try {
     const { projectData, sessionId } = req.body;
@@ -566,8 +568,12 @@ app.post('/api/optimization', async (req, res) => {
 
     // Use the specialized BESS optimization assistant, not the chat assistant
     const assistantId = process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID || 'asst_UbiZGczApr3xadJlGTruMV8J';
-    console.log('🎯 Using optimization assistant ID:', assistantId);
-    console.log('🔍 Environment variable OPENAI_OPTIMIZATION_ASSISTANT_ID:', process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID);
+    console.log('🚨🚨🚨 CRITICAL DEBUG INFO 🚨🚨🚨');
+    console.log('Assistant ID being used:', assistantId);
+    console.log('Environment variable OPENAI_OPTIMIZATION_ASSISTANT_ID:', process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID);
+    console.log('Expected BESS Assistant ID: asst_UbiZGczApr3xadJlGTruMV8J');
+    console.log('Expected Chat Assistant ID: asst_gkRgQtlA0WWreiRl3y6acyGC');
+    console.log('🚨🚨🚨 END CRITICAL DEBUG 🚨🚨🚨');
 
     // Natural language prompt similar to successful test format
     const duration = projectData.discharge_duration_h || (projectData.nominal_energy_mwh / projectData.nominal_power_mw);
