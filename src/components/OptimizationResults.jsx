@@ -74,9 +74,21 @@ const OptimizationResults = ({ results, projectRequirements }) => {
           const data = results.result.data;
           // Check if optimization data is in a string field that needs parsing
           if (data.optimization && typeof data.optimization === 'string') {
-            jsonData = JSON.parse(data.optimization);
+            // Handle case where JSON is followed by explanation text
+            let cleanJsonString = data.optimization;
+            const jsonEndIndex = cleanJsonString.lastIndexOf('}');
+            if (jsonEndIndex !== -1) {
+              cleanJsonString = cleanJsonString.substring(0, jsonEndIndex + 1);
+            }
+            jsonData = JSON.parse(cleanJsonString);
           } else if (data.result && typeof data.result === 'string') {
-            jsonData = JSON.parse(data.result);
+            // Handle case where JSON is followed by explanation text
+            let cleanJsonString = data.result;
+            const jsonEndIndex = cleanJsonString.lastIndexOf('}');
+            if (jsonEndIndex !== -1) {
+              cleanJsonString = cleanJsonString.substring(0, jsonEndIndex + 1);
+            }
+            jsonData = JSON.parse(cleanJsonString);
           } else {
             jsonData = data;
           }
@@ -84,9 +96,21 @@ const OptimizationResults = ({ results, projectRequirements }) => {
           const data = results.data;
           // Check if optimization data is in a string field that needs parsing
           if (data.optimization && typeof data.optimization === 'string') {
-            jsonData = JSON.parse(data.optimization);
+            // Handle case where JSON is followed by explanation text
+            let cleanJsonString = data.optimization;
+            const jsonEndIndex = cleanJsonString.lastIndexOf('}');
+            if (jsonEndIndex !== -1) {
+              cleanJsonString = cleanJsonString.substring(0, jsonEndIndex + 1);
+            }
+            jsonData = JSON.parse(cleanJsonString);
           } else if (data.result && typeof data.result === 'string') {
-            jsonData = JSON.parse(data.result);
+            // Handle case where JSON is followed by explanation text
+            let cleanJsonString = data.result;
+            const jsonEndIndex = cleanJsonString.lastIndexOf('}');
+            if (jsonEndIndex !== -1) {
+              cleanJsonString = cleanJsonString.substring(0, jsonEndIndex + 1);
+            }
+            jsonData = JSON.parse(cleanJsonString);
           } else {
             jsonData = data;
           }
@@ -97,7 +121,13 @@ const OptimizationResults = ({ results, projectRequirements }) => {
       
       // If still string after unwrapping, parse again (final fallback)
       if (typeof jsonData === 'string') {
-        jsonData = JSON.parse(jsonData);
+        // Handle case where JSON is followed by explanation text
+        let cleanJsonString = jsonData;
+        const jsonEndIndex = cleanJsonString.lastIndexOf('}');
+        if (jsonEndIndex !== -1) {
+          cleanJsonString = cleanJsonString.substring(0, jsonEndIndex + 1);
+        }
+        jsonData = JSON.parse(cleanJsonString);
       }
       
       console.log('Parsed BESS JSON:', jsonData);
