@@ -21,7 +21,8 @@ class AggregationService {
     this.historicalCache = null;
     this.lastFetch = null;
     
-    this.initWebSocket();
+    // Disable WebSocket for now - use polling instead
+    this.startPolling();
   }
 
   // Initialize WebSocket connection for real-time updates

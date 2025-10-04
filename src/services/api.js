@@ -23,7 +23,16 @@ export const apiService = {
   // Fetch real-time market data from database
   async getMarketData() {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+      // Determine API URL (same logic as chat)
+      let baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      
+      // For Netlify deployments, use Railway
+      if (typeof window !== 'undefined' && 
+          (window.location.hostname.includes('netlify.app') || 
+           window.location.hostname.includes('extraordinary-monstera-e00408'))) {
+        baseUrl = 'https://bess-chat-api-production.up.railway.app';
+        console.log('🌐 Netlify deployment detected, using Railway API:', baseUrl);
+      }
       
       const response = await fetch(`${baseUrl}/api/market-data`, {
         method: 'GET',
@@ -148,23 +157,14 @@ export const apiService = {
       if (extractedFormData && Object.keys(extractedFormData).length > 0) {
         const userIP = await this.getUserIP();
         
-        const projectData = {
+        // Don't save to Supabase automatically - only save when user confirms in step 5
+        console.log('📋 Extracted BESS form data:', extractedFormData);
+        console.log('🔄 Mapped data for database:', {
           session_id: sessionId,
           ...extractedFormData,
           form_data: extractedFormData,
-          chat_messages: messages,
-          user_ip: userIP
-        };
-
-        // Save to Supabase (non-blocking)
-        try {
-          const saveResult = await supabaseService.saveProject(projectData);
-          if (saveResult.success) {
-            console.log('📊 Project data saved to Supabase');
-          }
-        } catch (saveError) {
-          console.warn('Failed to save to Supabase:', saveError);
-        }
+          chat_messages: messages
+        });
       }
 
       return processedResult;

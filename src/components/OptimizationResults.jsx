@@ -432,7 +432,7 @@ const OptimizationResults = ({ results, projectRequirements }) => {
   }
 
   // If we have string data, display it formatted
-  if (typeof optimizationData === 'string' && !parsedData) {
+  if (typeof results === 'string' && !parsedData) {
     return (
       <div style={{
         background: 'rgba(255, 255, 255, 0.05)',
@@ -466,7 +466,7 @@ const OptimizationResults = ({ results, projectRequirements }) => {
             whiteSpace: 'pre-wrap',
             margin: 0
           }}>
-            {optimizationData}
+            {results}
           </pre>
         </div>
       </div>
@@ -623,7 +623,7 @@ const OptimizationResults = ({ results, projectRequirements }) => {
     return sections;
   };
 
-  const sections = extractSections(parsedData || optimizationData);
+  const sections = extractSections(parsedData || results);
 
   return (
     <div style={{
