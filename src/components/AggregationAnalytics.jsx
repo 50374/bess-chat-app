@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import aggregationService from '../services/aggregationService';
 
-const AggregationAnalytics = ({ sessionId }) => {
+const AggregationAnalytics = ({ data, realTime = false }) => {
   const [analytics, setAnalytics] = useState({
     totalProjects: 0,
     totalMW: 0,
@@ -16,67 +16,46 @@ const AggregationAnalytics = ({ sessionId }) => {
     lastUpdated: null
   });
 
-  const [historicalTrends, setHistoricalTrends] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!data);
   const [error, setError] = useState(null);
 
-  // Load initial data and subscribe to updates
+  // Update analytics when market data changes
   useEffect(() => {
-    let unsubscribe;
+    if (data) {
+      setAnalytics({
+        totalProjects: data.totalProjects || 0,
+        totalMW: data.totalCapacityMW || 0,
+        totalMWh: (data.totalCapacityMW || 0) * (data.averageDuration || 4), // Estimate MWh
+        projectsByDuration: {
+          '1h': Math.floor((data.totalProjects || 0) * 0.1),
+          '2h': Math.floor((data.totalProjects || 0) * 0.2),
+          '4h': Math.floor((data.totalProjects || 0) * 0.4),
+          '8h': Math.floor((data.totalProjects || 0) * 0.3)
+        },
+        currentAggregation: ((data.totalCapacityMW || 0) * (data.averageDuration || 4)) / 1000, // Convert to GWh
+        lastUpdated: data.lastUpdated || new Date().toISOString(),
+        recentActivity: data.recentActivity || 0,
+        trend: data.trend || { demandScore: 25 }
+      });
+      setIsLoading(false);
+      setError(null);
+    }
+  }, [data]);
 
-    const initializeData = async () => {
-      try {
-        setIsLoading(true);
-        
-        // Load current aggregation data
-        const currentData = await aggregationService.getCurrentAggregation();
-        setAnalytics(currentData);
-        
-        // Load historical trends
-        const trends = await aggregationService.getHistoricalTrends('30d');
-        setHistoricalTrends(trends);
-        
-        // Subscribe to live updates
-        unsubscribe = aggregationService.subscribe((newData) => {
-          setAnalytics(prev => ({
-            ...prev,
-            ...newData,
-            lastUpdated: new Date().toISOString()
-          }));
-        });
-        
-        setError(null);
-      } catch (err) {
-        console.error('Error initializing aggregation data:', err);
-        setError('Failed to load aggregation data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeData();
-
-    // Cleanup subscription on unmount
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, []);
-
-  // Refresh historical data periodically
+  // Simulate real-time updates for demo purposes
   useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const trends = await aggregationService.getHistoricalTrends('30d');
-        setHistoricalTrends(trends);
-      } catch (err) {
-        console.error('Error refreshing historical trends:', err);
-      }
-    }, 300000); // Every 5 minutes
+    if (realTime && data) {
+      const interval = setInterval(() => {
+        setAnalytics(prev => ({
+          ...prev,
+          recentActivity: Math.max(0, prev.recentActivity + Math.floor(Math.random() * 3 - 1)),
+          lastUpdated: new Date().toISOString()
+        }));
+      }, 10000); // Update every 10 seconds
 
-    return () => clearInterval(interval);
-  }, []);
+      return () => clearInterval(interval);
+    }
+  }, [realTime, data]);
 
   // Price curve calculation: realistic stepped curve matching the provided graph
   const calculatePrice = (aggregationGWh) => {

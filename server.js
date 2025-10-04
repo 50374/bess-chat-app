@@ -134,6 +134,99 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Market data endpoint - Real-time statistics from database
+app.get('/api/market-data', (req, res) => {
+  console.log('📊 Market data request received');
+  
+  const queries = {
+    totalProjects: `SELECT COUNT(*) as count FROM project_requirements WHERE created_date >= datetime('now', '-30 days')`,
+    totalCapacity: `SELECT COALESCE(SUM(nominal_power_mw), 0) as total FROM project_requirements WHERE nominal_power_mw IS NOT NULL AND created_date >= datetime('now', '-30 days')`,
+    averageDuration: `SELECT COALESCE(AVG(discharge_duration_h), 0) as avg FROM project_requirements WHERE discharge_duration_h IS NOT NULL AND created_date >= datetime('now', '-30 days')`,
+    topApplications: `SELECT application, COUNT(*) as count FROM project_requirements WHERE application IS NOT NULL AND application != '' AND created_date >= datetime('now', '-30 days') GROUP BY application ORDER BY count DESC LIMIT 5`,
+    regionDistribution: `SELECT 
+      CASE 
+        WHEN grid_code_compliance LIKE '%IEEE%' THEN 'North America'
+        WHEN grid_code_compliance LIKE '%IEC%' THEN 'Europe'
+        WHEN grid_code_compliance LIKE '%GB%' THEN 'China'
+        ELSE 'Other'
+      END as region,
+      COUNT(*) as count
+      FROM project_requirements 
+      WHERE grid_code_compliance IS NOT NULL AND created_date >= datetime('now', '-30 days')
+      GROUP BY region`,
+    recentActivity: `SELECT COUNT(*) as count FROM project_requirements WHERE created_date >= datetime('now', '-1 hour')`
+  };
+
+  Promise.all([
+    new Promise((resolve, reject) => {
+      db.get(queries.totalProjects, (err, row) => {
+        if (err) reject(err);
+        else resolve(row.count || 0);
+      });
+    }),
+    new Promise((resolve, reject) => {
+      db.get(queries.totalCapacity, (err, row) => {
+        if (err) reject(err);
+        else resolve(row.total || 0);
+      });
+    }),
+    new Promise((resolve, reject) => {
+      db.get(queries.averageDuration, (err, row) => {
+        if (err) reject(err);
+        else resolve(row.avg || 0);
+      });
+    }),
+    new Promise((resolve, reject) => {
+      db.all(queries.topApplications, (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows.map(row => row.application));
+      });
+    }),
+    new Promise((resolve, reject) => {
+      db.all(queries.regionDistribution, (err, rows) => {
+        if (err) reject(err);
+        else {
+          const distribution = {};
+          rows.forEach(row => {
+            distribution[row.region] = row.count;
+          });
+          resolve(distribution);
+        }
+      });
+    }),
+    new Promise((resolve, reject) => {
+      db.get(queries.recentActivity, (err, row) => {
+        if (err) reject(err);
+        else resolve(row.count || 0);
+      });
+    })
+  ]).then(([totalProjects, totalCapacityMW, averageDuration, topApplications, regionDistribution, recentActivity]) => {
+    const marketData = {
+      totalProjects,
+      totalCapacityMW: Number(totalCapacityMW.toFixed(1)),
+      averageDuration: Number(averageDuration.toFixed(1)),
+      topApplications,
+      regionDistribution,
+      recentActivity,
+      lastUpdated: new Date().toISOString(),
+      trend: {
+        projectsGrowth: Math.random() * 20 - 10, // Simulated growth percentage
+        capacityGrowth: Math.random() * 30 - 15,
+        demandScore: Math.min(100, Math.max(0, 50 + (totalProjects * 2) + (recentActivity * 10)))
+      }
+    };
+
+    console.log('📊 Market data compiled:', marketData);
+    res.json(marketData);
+  }).catch(error => {
+    console.error('❌ Market data error:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch market data',
+      details: error.message 
+    });
+  });
+});
+
 // OpenAI chat endpoint - using Assistants API
 app.post('/api/chat', async (req, res) => {
   console.log('📨 Chat request received from:', req.headers.origin);

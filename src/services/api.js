@@ -20,6 +20,54 @@ export const apiService = {
     }
   },
 
+  // Fetch real-time market data from database
+  async getMarketData() {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+      
+      const response = await fetch(`${baseUrl}/api/market-data`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error(`Market data fetch failed: ${response.status}`)
+      }
+
+      const data = await response.json()
+      console.log('📊 Market data received:', data)
+      
+      return {
+        success: true,
+        data: data
+      }
+    } catch (error) {
+      console.error('❌ Market data fetch error:', error)
+      return {
+        success: false,
+        error: error.message,
+        // Return fallback data if fetch fails
+        data: {
+          totalProjects: 0,
+          totalCapacityMW: 0,
+          averageDuration: 0,
+          topApplications: ['Grid Services', 'Peak Shaving', 'Renewable Integration'],
+          regionDistribution: {},
+          recentActivity: 0,
+          lastUpdated: new Date().toISOString(),
+          trend: {
+            projectsGrowth: 0,
+            capacityGrowth: 0,
+            demandScore: 25
+          }
+        }
+      }
+    }
+  },
+
   // Complete chat interaction with data persistence
   async processChatMessage(messages, extractedInfo, sessionId) {
     try {
