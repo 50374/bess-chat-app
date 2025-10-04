@@ -563,24 +563,29 @@ app.post('/api/optimization', async (req, res) => {
       throw new Error('OpenAI API key not configured');
     }
 
-    const assistantId = process.env.OPENAI_ASSISTANT_ID || 'asst_gkRgQtlA0WWreiRl3y6acyGC';
+    // Use the specialized BESS optimization assistant, not the chat assistant
+    const assistantId = process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID || 'asst_UbiZGczApr3xadJlGTruMV8J';
 
-    // Create optimization prompt from project data
-    const optimizationPrompt = `Please optimize this BESS configuration:
+    // Create optimization request for BESS sizing assistant
+    const optimizationPrompt = `Size and optimize this BESS project:
 
-PROJECT REQUIREMENTS:
-${Object.entries(projectData)
-  .filter(([key, value]) => value && value !== '' && value !== 0 && value !== false)
-  .map(([key, value]) => `• ${key}: ${value}`)
-  .join('\n')}
+project_power_ac_mw: ${projectData.nominal_power_mw}
+project_energy_mwh: ${projectData.nominal_energy_mwh}
+duration_hr: ${projectData.discharge_duration_h || (projectData.nominal_energy_mwh / projectData.nominal_power_mw)}
+cycles_per_day: ${projectData.expected_daily_cycles}
+warranty_years: ${projectData.warranty_years || 20}
+ambient_temp_range_c: ${projectData.ambient_temp_range_c || '{"min": -20, "max": 40}'}
+grid_voltage_v: ${projectData.grid_voltage_v || null}
+grid_frequency_hz: ${projectData.grid_frequency_hz || null}
+standards_required: ${projectData.standards_required || '["UL9540A", "IEC 62933"]'}
+overbuild_limit_pct: 15
 
-Please provide a comprehensive optimization analysis with:
-1. System Overview (recommended configuration)
-2. Technical Specifications (detailed specs)
-3. Economic Analysis (cost breakdown, ROI projections)  
-4. Implementation Recommendations (next steps)
+Application: ${projectData.application}
+Delivery: ${projectData.delivery_schedule}
+Incoterms: ${projectData.incoterms}
+Grid Code: ${projectData.grid_code_compliance || 'standard'}
 
-Format as structured sections with clear headings for easy parsing.`;
+Please return only the JSON response per your schema.`;
 
     console.log('🤖 Creating thread for optimization...');
     

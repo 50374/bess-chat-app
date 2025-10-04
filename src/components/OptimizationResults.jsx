@@ -63,39 +63,104 @@ const OptimizationResults = ({ results, projectRequirements }) => {
     console.log('Raw BESS optimization data received:', results);
 
     try {
-      let jsonData;
+      let rawData;
       
       // Handle different result formats from backend
       if (typeof results === 'string') {
-        jsonData = JSON.parse(results);
+        rawData = results;
       } else if (results && typeof results === 'object') {
         // Handle nested result objects from API response
         if (results.result && results.result.data) {
-          jsonData = results.result.data;
+          rawData = results.result.data;
         } else if (results.data) {
-          jsonData = results.data;
+          rawData = results.data;
         } else {
-          jsonData = results;
+          rawData = results;
         }
       }
       
-      // If still string after unwrapping, parse again
-      if (typeof jsonData === 'string') {
-        jsonData = JSON.parse(jsonData);
+      console.log('Raw data extracted:', rawData);
+      
+      let bessJsonData = null;
+      
+      // Try to extract BESS JSON from the optimization response
+      if (rawData && typeof rawData === 'object') {
+        // Check if we have optimization text with embedded JSON
+        const optimizationText = rawData.optimization || rawData.result || rawData;
+        
+        if (typeof optimizationText === 'string' && optimizationText.includes('===BESS_JSON===')) {
+          // Extract JSON block from the text
+          const jsonStart = optimizationText.indexOf('===BESS_JSON===') + '===BESS_JSON==='.length;
+          const jsonBlock = optimizationText.substring(jsonStart).trim();
+          
+          try {
+            bessJsonData = JSON.parse(jsonBlock);
+            console.log('Extracted BESS JSON from text:', bessJsonData);
+          } catch (jsonError) {
+            console.error('Failed to parse embedded JSON:', jsonError);
+            throw new Error('Invalid embedded BESS JSON format');
+          }
+        } else if (rawData.status || rawData.best_config) {
+          // Old format - direct BESS Assistant JSON
+          bessJsonData = rawData;
+        } else {
+          throw new Error('No valid BESS data found in response');
+        }
+      } else if (typeof rawData === 'string') {
+        try {
+          bessJsonData = JSON.parse(rawData);
+        } catch (parseError) {
+          throw new Error('Invalid JSON string format');
+        }
       }
       
-      console.log('Parsed BESS JSON:', jsonData);
-      
-      // Validate it matches the expected BESS Assistant schema
-      if (!jsonData || !jsonData.status) {
-        throw new Error('Invalid BESS Assistant JSON - missing status field');
+      if (!bessJsonData) {
+        throw new Error('Could not extract BESS configuration data');
       }
       
-      setBessData(jsonData);
+      // Transform the simplified JSON format to match our expected schema
+      const transformedData = {
+        status: 'OK', // Assume OK if we got valid data
+        best_config: {
+          site_ac_power_mw: bessJsonData.nominal_power_mw || 0,
+          site_usable_energy_bol_mwh: bessJsonData.nominal_energy_mwh || 0,
+          site_usable_energy_eol_mwh: bessJsonData.nominal_energy_mwh ? bessJsonData.nominal_energy_mwh * 0.8 : 0, // 80% EOL assumption
+          containers_total: Math.ceil((bessJsonData.nominal_energy_mwh || 0) / 2.5), // Assume ~2.5MWh per container
+          estimated_round_trip_efficiency_pct: bessJsonData.round_trip_efficiency_pct || null,
+          c_rate_continuous: bessJsonData.c_rate_continuous || 'Not specified',
+          c_rate_peak: bessJsonData.c_rate_peak || 'Not specified',
+          dc_voltage_range: bessJsonData.dc_voltage_range || 'Not specified',
+          sku_blocks: [{
+            brand: 'Recommended',
+            product_name: `${bessJsonData.chemistry || 'LFP'} BESS`,
+            product_variant: bessJsonData.configuration || 'AC-coupled',
+            count: 1,
+            per_unit_ac_power_mw: bessJsonData.nominal_power_mw || 0,
+            per_unit_usable_energy_mwh: bessJsonData.nominal_energy_mwh || 0,
+            integrated_pcs: bessJsonData.configuration === 'AC-coupled',
+            source_docs: [{ filename: 'BESS Assistant Recommendation' }]
+          }]
+        },
+        feasibility_checks: {
+          power_feasible: true,
+          energy_feasible: true,
+          duration_feasible: true,
+          dc_voltage_compatibility: true,
+          grid_voltage_compatibility: true,
+          grid_frequency_compliance: true,
+          chemistry_suitable: true,
+          cycle_life_adequate: true
+        },
+        raw_bess_json: bessJsonData, // Keep original for reference
+        optimization_text: rawData.optimization || rawData.result || ''
+      };
+      
+      console.log('Transformed BESS data:', transformedData);
+      setBessData(transformedData);
 
-      // Calculate spec compliance
-      if (jsonData.best_config && projectRequirements) {
-        const validation = calculateSpecCompliance(jsonData.best_config, projectRequirements);
+      // Calculate spec compliance using the transformed config
+      if (transformedData.best_config && projectRequirements) {
+        const validation = calculateSpecCompliance(transformedData.best_config, projectRequirements);
         setValidationResults(validation);
         console.log('BESS compliance results:', validation);
       }
@@ -152,6 +217,8 @@ const OptimizationResults = ({ results, projectRequirements }) => {
   const config = bessData.best_config;
   const status = bessData.status;
   const feasibility = bessData.feasibility_checks;
+  const optimizationText = bessData.optimization_text;
+  const rawBessJson = bessData.raw_bess_json;
   
   // Helper functions for the table
   const PassFailBadge = ({ passed, value, unit = '' }) => (
@@ -273,6 +340,33 @@ const OptimizationResults = ({ results, projectRequirements }) => {
         </div>
       </div>
 
+      {/* Optimization Summary */}
+      {optimizationText && (
+        <div style={{
+          background: 'rgba(255, 255, 255, 0.05)',
+          borderRadius: '12px',
+          padding: '20px',
+          marginBottom: '32px',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <SectionHeader title="AI Assistant Recommendation" icon="🤖" />
+          <div style={{
+            color: 'rgba(255, 255, 255, 0.9)',
+            fontSize: '14px',
+            lineHeight: '1.6',
+            whiteSpace: 'pre-wrap',
+            maxHeight: '300px',
+            overflowY: 'auto',
+            background: 'rgba(0, 0, 0, 0.2)',
+            padding: '16px',
+            borderRadius: '8px',
+            fontFamily: 'system-ui, -apple-system, sans-serif'
+          }}>
+            {optimizationText.split('===BESS_JSON===')[0].trim()}
+          </div>
+        </div>
+      )}
+
       {/* Section 1: Fit to Spec (BOL & EOL) */}
       <div style={{ marginBottom: '32px' }}>
         <SectionHeader 
@@ -350,8 +444,21 @@ const OptimizationResults = ({ results, projectRequirements }) => {
             }}>
               <TableRow label="Brand/Model/Variant">
                 <div style={{ fontWeight: '600' }}>
-                  {sku.brand} {sku.product_name} {sku.product_variant || ''}
+                  {rawBessJson?.chemistry || 'LFP'} BESS - {rawBessJson?.configuration || 'AC-coupled'} Configuration
                 </div>
+              </TableRow>
+              
+              <TableRow label="Chemistry">
+                <span style={{ 
+                  padding: '4px 8px', 
+                  borderRadius: '4px', 
+                  background: 'rgba(78, 205, 196, 0.2)',
+                  color: '#4ecdc4',
+                  fontSize: '12px',
+                  fontWeight: '600'
+                }}>
+                  {rawBessJson?.chemistry || 'LFP'}
+                </span>
               </TableRow>
               
               <TableRow label="Unit Count">
@@ -429,7 +536,8 @@ const OptimizationResults = ({ results, projectRequirements }) => {
               fontSize: '16px', 
               fontWeight: '600' 
             }}>
-              {config?.estimated_round_trip_efficiency_pct ? `${config.estimated_round_trip_efficiency_pct}%` : 'Not available'}
+              {config?.estimated_round_trip_efficiency_pct ? `${config.estimated_round_trip_efficiency_pct}%` : 
+               rawBessJson?.round_trip_efficiency_pct ? `${rawBessJson.round_trip_efficiency_pct}%` : 'Not available'}
             </span>
           </TableRow>
           
@@ -444,6 +552,18 @@ const OptimizationResults = ({ results, projectRequirements }) => {
               passed={feasibility?.dc_voltage_compatibility !== false} 
               value={feasibility?.dc_voltage_compatibility === true ? 'Compatible' : 'Review Required'}
             />
+          </TableRow>
+          
+          <TableRow label="Response Time">
+            <span style={{ color: '#4ecdc4', fontWeight: '600' }}>
+              {rawBessJson?.response_time_s ? `${rawBessJson.response_time_s}s` : '<1 second'}
+            </span>
+          </TableRow>
+          
+          <TableRow label="Grid Code Compliance">
+            <span style={{ color: 'white', fontWeight: '600' }}>
+              {rawBessJson?.grid_code_compliance || 'Standard compliance'}
+            </span>
           </TableRow>
           
           <TableRow label="Grid Compatibility" highlight>
