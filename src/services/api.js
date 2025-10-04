@@ -276,9 +276,12 @@ export const apiService = {
       // Call our secure backend API instead of OpenAI directly
       let apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
       
-      // For Netlify deploy previews, use the Railway production API
-      if (window.location.hostname.includes('netlify.app')) {
+      // For any Netlify deployment (development branch or deploy previews), use Railway
+      if (typeof window !== 'undefined' && 
+          (window.location.hostname.includes('netlify.app') || 
+           window.location.hostname.includes('extraordinary-monstera-e00408'))) {
         apiUrl = 'https://bess-chat-api-production.up.railway.app';
+        console.log('🌐 Netlify deployment detected, using Railway API:', apiUrl);
       }
       
       const response = await fetch(`${apiUrl}/api/optimization`, {

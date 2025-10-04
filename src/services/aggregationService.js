@@ -5,9 +5,12 @@ class AggregationService {
       ? 'https://bess-chat-api-production.up.railway.app'
       : 'http://localhost:3001';
     
-    // For Netlify deploy previews, use the Railway production API
-    if (window.location.hostname.includes('netlify.app')) {
+    // For any Netlify deployment (development branch or deploy previews), use Railway
+    if (typeof window !== 'undefined' && 
+        (window.location.hostname.includes('netlify.app') || 
+         window.location.hostname.includes('extraordinary-monstera-e00408'))) {
       this.baseUrl = 'https://bess-chat-api-production.up.railway.app';
+      console.log('🌐 Netlify deployment detected, using Railway API:', this.baseUrl);
     }
     
     // WebSocket connection for live updates
