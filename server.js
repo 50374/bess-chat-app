@@ -554,6 +554,7 @@ Please provide detailed product recommendations with exact model numbers, quanti
 // BESS Optimization endpoint - using OpenAI Assistant for secure optimization
 app.post('/api/optimization', async (req, res) => {
   console.log('🎯 BESS optimization request received');
+  console.log('🔧 Debug: Server version with assistant ID logging active');
   
   try {
     const { projectData, sessionId } = req.body;
