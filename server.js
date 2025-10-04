@@ -565,6 +565,8 @@ app.post('/api/optimization', async (req, res) => {
 
     // Use the specialized BESS optimization assistant, not the chat assistant
     const assistantId = process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID || 'asst_UbiZGczApr3xadJlGTruMV8J';
+    console.log('🎯 Using optimization assistant ID:', assistantId);
+    console.log('🔍 Environment variable OPENAI_OPTIMIZATION_ASSISTANT_ID:', process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID);
 
     // Simple project requirements - let the assistant's system instructions handle the rest
     const optimizationPrompt = `project_power_ac_mw: ${projectData.nominal_power_mw}
@@ -615,6 +617,7 @@ incoterms: ${projectData.incoterms}`;
     console.log('🚀 Running optimization assistant...');
     
     // Run assistant with JSON response format to get structured BESS configuration
+    console.log('🚀 Making API call with assistant_id:', assistantId);
     const runResponse = await fetch(`https://api.openai.com/v1/threads/${thread.id}/runs`, {
       method: 'POST',
       headers: {
