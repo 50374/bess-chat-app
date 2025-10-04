@@ -569,17 +569,9 @@ app.post('/api/optimization', async (req, res) => {
     console.log('🎯 Using optimization assistant ID:', assistantId);
     console.log('🔍 Environment variable OPENAI_OPTIMIZATION_ASSISTANT_ID:', process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID);
 
-    // Simple project requirements - let the assistant's system instructions handle the rest
-    const optimizationPrompt = `project_power_ac_mw: ${projectData.nominal_power_mw}
-project_energy_mwh: ${projectData.nominal_energy_mwh}
-duration_hr: ${projectData.discharge_duration_h || (projectData.nominal_energy_mwh / projectData.nominal_power_mw)}
-cycles_per_day: ${projectData.expected_daily_cycles}
-warranty_years: 20
-ambient_temp_range_c: {"min": -20, "max": 40}
-overbuild_limit_pct: 15
-application: ${projectData.application}
-delivery_schedule: ${projectData.delivery_schedule}
-incoterms: ${projectData.incoterms}`;
+    // Natural language prompt similar to successful test format
+    const duration = projectData.discharge_duration_h || (projectData.nominal_energy_mwh / projectData.nominal_power_mw);
+    const optimizationPrompt = `Hi! Can you recommend some products for a BESS project that is ${projectData.nominal_power_mw}MW ${duration} hours duration and used for ${projectData.application}? We will be cycling it ${projectData.expected_daily_cycles} times daily. The project delivery is needed for ${projectData.delivery_schedule} with ${projectData.incoterms} terms.`;
 
     console.log('🤖 Creating thread for optimization...');
     
