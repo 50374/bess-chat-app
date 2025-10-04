@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NPM_FLAGS = "--production=false"
 
 # Deploy the main branch to production
 [context.production]
@@ -20,6 +21,15 @@
 # Branch deploys - automatically deploy specific branches
 [[branch-deploy]]
   branch = "development"
+
+# Force deploy for development branch
+[context."branch-deploy"]
+  command = "npm run build"
+  
+# Specific development context
+[context.development]
+  command = "npm run build"
+  publish = "dist"
   
 # Redirect rules
 [[redirects]]
