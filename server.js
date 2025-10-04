@@ -40,7 +40,7 @@ db.serialize(() => {
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-console.log('🚨🚨🚨 SERVER STARTUP - FORCE REBUILD VERSION 2.0 🚨🚨🚨');
+console.log('🚨🚨🚨 SERVER STARTUP - DEVELOPMENT BRANCH DEPLOY v3.0 🚨🚨🚨');
 
 // Manual CORS handler for troubleshooting
 app.use((req, res, next) => {
