@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Deploy the main branch to production
+[context.production]
+  command = "npm run build"
+
+# Deploy the development branch to a branch deploy
+[context.development]
+  command = "npm run build"
+
+# Deploy previews for pull requests
+[context.deploy-preview]
+  command = "npm run build"
+
+# Branch deploys - automatically deploy specific branches
+[[branch-deploy]]
+  branch = "development"
+  
+# Redirect rules
+[[redirects]]
+  from = "/api/*"
+  to = "https://bess-chat-api-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
