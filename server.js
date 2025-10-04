@@ -1,9 +1,41 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Database setup
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const dbPath = path.join(__dirname, 'database', 'bess_database.db');
+const db = new sqlite3.Database(dbPath);
+
+// Initialize database with schema
+db.serialize(() => {
+  db.run(`CREATE TABLE IF NOT EXISTS project_requirements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id TEXT,
+    created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    nominal_power_mw REAL,
+    nominal_energy_mwh REAL,
+    discharge_duration_h REAL,
+    application TEXT,
+    expected_daily_cycles INTEGER,
+    delivery_date TEXT,
+    incoterms TEXT,
+    chemistry_preference TEXT,
+    grid_code_compliance TEXT,
+    environmental_conditions TEXT,
+    certifications_required TEXT,
+    recommended_systems TEXT,
+    comparison_analysis TEXT,
+    extracted_info TEXT
+  )`);
+});
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -587,6 +619,211 @@ Format as structured sections with clear headings for easy parsing.`;
     });
   }
 });
+
+// Project submission endpoint (only called when user consents)
+app.post('/api/submit-project', async (req, res) => {
+  console.log('📋 Project submission requested (user consented)');
+  
+  try {
+    const { projectData, userInfo, recommendation } = req.body;
+    
+    if (!projectData) {
+      return res.status(400).json({ error: 'Project data is required' });
+    }
+    
+    // Save to database only when user explicitly consents
+    const projectId = await saveProjectRequirements({
+      ...projectData,
+      userInfo,
+      recommendation
+    });
+    
+    console.log('✅ Project submitted to database with ID:', projectId);
+    res.json({ 
+      success: true, 
+      projectId,
+      message: 'Project successfully submitted to database'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error submitting project:', error);
+    res.status(500).json({ error: 'Failed to submit project' });
+  }
+});
+
+// Aggregation API endpoints
+app.get('/api/aggregation/historical', async (req, res) => {
+  console.log('📊 Historical aggregation data requested');
+  
+  try {
+    const { timeframe = '30d' } = req.query;
+    
+    // Get real data from database
+    const realData = await getAggregationData(timeframe);
+    
+    res.json(realData);
+  } catch (error) {
+    console.error('❌ Error fetching aggregation data:', error);
+    res.status(500).json({ error: 'Failed to fetch aggregation data' });
+  }
+});
+
+// Function to get real aggregation data from database
+function getAggregationData(timeframe) {
+  return new Promise((resolve, reject) => {
+    const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 90;
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+    
+    // Query project submissions over time
+    db.all(`
+      SELECT 
+        DATE(created_date) as date,
+        COUNT(*) as project_count,
+        AVG(nominal_power_mw) as avg_power,
+        AVG(nominal_energy_mwh) as avg_energy,
+        AVG(discharge_duration_h) as avg_duration,
+        application,
+        chemistry_preference
+      FROM project_requirements 
+      WHERE created_date >= ? 
+      GROUP BY DATE(created_date)
+      ORDER BY date
+    `, [startDate], (err, rows) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      
+      // Query total statistics
+      db.get(`
+        SELECT 
+          COUNT(*) as total_projects,
+          AVG(nominal_power_mw) as avg_power,
+          AVG(nominal_energy_mwh) as avg_energy,
+          AVG(discharge_duration_h) as avg_duration
+        FROM project_requirements 
+        WHERE created_date >= ?
+      `, [startDate], (err, stats) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        
+        // Query application distribution
+        db.all(`
+          SELECT application, COUNT(*) as count
+          FROM project_requirements 
+          WHERE created_date >= ? AND application IS NOT NULL
+          GROUP BY application
+        `, [startDate], (err, appData) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          
+          const aggregationData = {
+            timeframe,
+            totalProjects: stats?.total_projects || 0,
+            trends: {
+              capacity: {
+                average: stats?.avg_power || 0,
+                growth: rows.length > 1 ? ((rows[rows.length-1]?.avg_power - rows[0]?.avg_power) / rows[0]?.avg_power * 100) || 0 : 0,
+                data: rows.map(row => ({
+                  date: row.date,
+                  value: row.avg_power || 0
+                }))
+              },
+              energy: {
+                average: stats?.avg_energy || 0,
+                growth: rows.length > 1 ? ((rows[rows.length-1]?.avg_energy - rows[0]?.avg_energy) / rows[0]?.avg_energy * 100) || 0 : 0,
+                data: rows.map(row => ({
+                  date: row.date,
+                  value: row.avg_energy || 0
+                }))
+              },
+              duration: {
+                average: stats?.avg_duration || 0,
+                improvement: rows.length > 1 ? ((rows[rows.length-1]?.avg_duration - rows[0]?.avg_duration) / rows[0]?.avg_duration * 100) || 0 : 0,
+                data: rows.map(row => ({
+                  date: row.date,
+                  value: row.avg_duration || 0
+                }))
+              },
+              projectCount: {
+                total: stats?.total_projects || 0,
+                data: rows.map(row => ({
+                  date: row.date,
+                  value: row.project_count || 0
+                }))
+              }
+            },
+            applications: appData.reduce((acc, app) => {
+              acc[app.application] = app.count;
+              return acc;
+            }, {}),
+            lastUpdated: new Date().toISOString()
+          };
+          
+          resolve(aggregationData);
+        });
+      });
+    });
+  });
+}
+
+// Function to save project requirements to database
+function saveProjectRequirements(extractedInfo) {
+  return new Promise((resolve, reject) => {
+    // Generate a session ID if not provided
+    const sessionId = extractedInfo.sessionId || Date.now().toString();
+    
+    // Extract relevant fields from the extractedInfo
+    const {
+      nominalPower,
+      nominalEnergy, 
+      dischargeDuration,
+      application,
+      expectedDailyCycles,
+      deliveryDate,
+      incoterms,
+      chemistryPreference,
+      gridCodeCompliance,
+      environmentalConditions,
+      certificationsRequired
+    } = extractedInfo;
+    
+    db.run(`
+      INSERT INTO project_requirements (
+        session_id, nominal_power_mw, nominal_energy_mwh, discharge_duration_h,
+        application, expected_daily_cycles, delivery_date, incoterms,
+        chemistry_preference, grid_code_compliance, environmental_conditions,
+        certifications_required, extracted_info
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      sessionId,
+      parseFloat(nominalPower) || null,
+      parseFloat(nominalEnergy) || null,
+      parseFloat(dischargeDuration) || null,
+      application || null,
+      parseInt(expectedDailyCycles) || null,
+      deliveryDate || null,
+      incoterms || null,
+      chemistryPreference || null,
+      gridCodeCompliance || null,
+      environmentalConditions || null,
+      certificationsRequired || null,
+      JSON.stringify(extractedInfo)
+    ], function(err) {
+      if (err) {
+        console.error('❌ Error saving project requirements:', err);
+        reject(err);
+      } else {
+        console.log('✅ Project requirements saved to database, ID:', this.lastID);
+        resolve(this.lastID);
+      }
+    });
+  });
+}
 
 // Start server
 app.listen(PORT, () => {

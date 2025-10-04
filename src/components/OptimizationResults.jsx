@@ -247,12 +247,19 @@ const OptimizationResults = ({ optimizationData }) => {
     
     if (typeof data === 'string') {
       text = data;
+    } else if (data && data.optimization) {
+      text = data.optimization;
     } else if (data && data.result) {
       text = data.result;
     } else if (data && data.data) {
       text = typeof data.data === 'string' ? data.data : JSON.stringify(data.data, null, 2);
     } else {
       text = JSON.stringify(data, null, 2);
+    }
+
+    // Ensure text is a string before using .match()
+    if (typeof text !== 'string') {
+      text = String(text);
     }
 
     const sections = {
