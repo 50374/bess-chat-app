@@ -1,3 +1,4 @@
+// BESS Chat API Server - Updated for clean workflow demo
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
