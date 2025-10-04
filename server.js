@@ -691,6 +691,7 @@ incoterms: ${projectData.incoterms}`;
       : 'Unable to generate optimization';
 
     console.log('✅ Optimization completed successfully');
+    console.log('📋 Final optimization response preview:', optimization.substring(0, 200) + '...');
 
     res.json({
       success: true,
@@ -698,6 +699,11 @@ incoterms: ${projectData.incoterms}`;
         optimization,
         result: optimization, // For compatibility
         sessionId,
+        debugInfo: {
+          assistantIdUsed: assistantId,
+          threadId: thread.id,
+          hasEnvironmentVariable: !!process.env.OPENAI_OPTIMIZATION_ASSISTANT_ID
+        },
         threadId: thread.id,
         runId: run.id,
         timestamp: new Date().toISOString()
