@@ -762,6 +762,93 @@ app.get('/api/aggregation/historical', async (req, res) => {
   }
 });
 
+// Current aggregation endpoint
+app.get('/api/aggregation/current', async (req, res) => {
+  console.log('📊 Current aggregation data requested');
+  
+  try {
+    // Get current aggregation statistics
+    const currentData = await getCurrentAggregationData();
+    res.json(currentData);
+  } catch (error) {
+    console.error('❌ Error fetching current aggregation data:', error);
+    res.status(500).json({ error: 'Failed to fetch current aggregation data' });
+  }
+});
+
+// Function to get current aggregation data from database
+function getCurrentAggregationData() {
+  return new Promise((resolve, reject) => {
+    // Get total project counts and statistics
+    db.all(`
+      SELECT 
+        COUNT(*) as total_projects,
+        SUM(nominal_power_mw) as total_mw,
+        SUM(nominal_energy_mwh) as total_mwh,
+        discharge_duration_h,
+        COUNT(*) as duration_count
+      FROM project_submissions 
+      WHERE nominal_power_mw > 0 
+      GROUP BY discharge_duration_h
+      ORDER BY discharge_duration_h
+    `, [], (err, durationRows) => {
+      if (err) {
+        console.error('Database error:', err);
+        reject(err);
+        return;
+      }
+
+      // Get overall totals
+      db.get(`
+        SELECT 
+          COUNT(*) as total_projects,
+          COALESCE(SUM(nominal_power_mw), 0) as total_mw,
+          COALESCE(SUM(nominal_energy_mwh), 0) as total_mwh
+        FROM project_submissions 
+        WHERE nominal_power_mw > 0
+      `, [], (err, totals) => {
+        if (err) {
+          console.error('Database error:', err);
+          reject(err);
+          return;
+        }
+
+        // Process duration data
+        const durationData = {
+          projects_1h: 0,
+          projects_2h: 0,
+          projects_4h: 0,
+          projects_8h: 0
+        };
+
+        durationRows.forEach(row => {
+          const duration = Math.round(row.discharge_duration_h);
+          if (duration === 1) durationData.projects_1h = row.duration_count;
+          else if (duration === 2) durationData.projects_2h = row.duration_count;
+          else if (duration === 4) durationData.projects_4h = row.duration_count;
+          else if (duration === 8) durationData.projects_8h = row.duration_count;
+        });
+
+        const currentAggregation = {
+          total_projects: totals?.total_projects || 0,
+          total_mw: totals?.total_mw || 0,
+          total_mwh: totals?.total_mwh || 0,
+          current_price_eur_per_kwh: 210, // Base price
+          ...durationData,
+          pricing_tiers: [
+            { capacity_gwh: 0, price_eur_per_kwh: 210 },
+            { capacity_gwh: 4, price_eur_per_kwh: 160 },
+            { capacity_gwh: 8, price_eur_per_kwh: 105 },
+            { capacity_gwh: 12, price_eur_per_kwh: 50 }
+          ]
+        };
+
+        resolve(currentAggregation);
+      });
+    });
+  });
+}
+
 // Function to get real aggregation data from database
 function getAggregationData(timeframe) {
   return new Promise((resolve, reject) => {
