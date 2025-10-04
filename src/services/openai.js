@@ -3,7 +3,13 @@ export const openaiService = {
   // Chat with OpenAI - this will be called through your backend API
   async sendChatMessage(messages, extractedInfo = null) {
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+      let apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      
+      // For Netlify deploy previews, use the Railway production API
+      if (window.location.hostname.includes('netlify.app')) {
+        apiUrl = 'https://bess-chat-api-production.up.railway.app';
+      }
+      
       const assistantId = import.meta.env.VITE_OPENAI_ASSISTANT_ID
       
       const response = await fetch(`${apiUrl}/api/chat`, {
@@ -38,7 +44,12 @@ export const openaiService = {
   // Extract BESS specifications from text (for future datasheet upload)
   async extractSpecifications(text) {
     try {
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'
+      let apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      
+      // For Netlify deploy previews, use the Railway production API
+      if (window.location.hostname.includes('netlify.app')) {
+        apiUrl = 'https://bess-chat-api-production.up.railway.app';
+      }
       
       const response = await fetch(`${apiUrl}/api/extract-specs`, {
         method: 'POST',

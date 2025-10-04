@@ -274,7 +274,12 @@ export const apiService = {
       console.log('🎯 Step 3: Getting optimization for:', projectData);
       
       // Call our secure backend API instead of OpenAI directly
-      const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      let apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      
+      // For Netlify deploy previews, use the Railway production API
+      if (window.location.hostname.includes('netlify.app')) {
+        apiUrl = 'https://bess-chat-api-production.up.railway.app';
+      }
       
       const response = await fetch(`${apiUrl}/api/optimization`, {
         method: 'POST',

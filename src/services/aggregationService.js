@@ -2,8 +2,13 @@
 class AggregationService {
   constructor() {
     this.baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://bess-chat-app-production.up.railway.app'
+      ? 'https://bess-chat-api-production.up.railway.app'
       : 'http://localhost:3001';
+    
+    // For Netlify deploy previews, use the Railway production API
+    if (window.location.hostname.includes('netlify.app')) {
+      this.baseUrl = 'https://bess-chat-api-production.up.railway.app';
+    }
     
     // WebSocket connection for live updates
     this.ws = null;
