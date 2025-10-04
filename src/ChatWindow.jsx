@@ -1,58 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { apiService } from './services/api.js';
 
-const ChatWindow = ({ onInterestDetected, requestMissingFields, onMissingFieldsHandled, onChatUpdate, sessionId }) => {
+const ChatWindow = ({ onExtractInfo, requestMissingFields, onMissingFieldsHandled, onChatUpdate, sessionId }) => {
   const [extractedInfo, setExtractedInfo] = useState(null);
-  const [messages, setMessages] = useState([
-    {
-      role: 'system',
-      content: `You are "BESS RFQ Architect," a senior battery energy storage specialist helping infrastructure investors design their BESS projects. You're enthusiastic, knowledgeable, and genuinely interested in helping them succeed.
-
-CRITICAL BESS KNOWLEDGE:
-- **C-Rate Understanding**: C-rate determines discharge duration
-  * 1C = 1 hour discharge duration
-  * 0.5C = 2 hour discharge duration (1 ÷ 0.5 = 2 hours)
-  * 2C = 0.5 hour discharge duration (1 ÷ 2 = 0.5 hours)
-  * Formula: Duration (hours) = 1 ÷ C-rate
-- **Energy Calculation**: Energy (MWh) = Power (MW) × Duration (hours)
-- **Battery Chemistry Recognition** (respond to ANY of these terms):
-  * LFP/LiFePO4/Lithium Iron Phosphate: Most common utility-scale, safe, cost-effective
-  * NMC/NCM/Lithium Nickel Manganese Cobalt: Higher energy density, more expensive
-  * LTO/Lithium Titanate: Fast charging, long cycle life, cold weather performance
-  * NCA/Lithium Nickel Cobalt Aluminum: High performance applications
-- **Configuration Types** (recognize these terms):
-  * AC-coupled/AC coupled: Easier grid integration, standard for most projects
-  * DC-coupled/DC coupled: Better for co-located solar, higher efficiency for solar+storage
-  * Standalone/Grid-scale/Utility-scale: Independent BESS without co-located generation
-- **Technical Abbreviations to Recognize**:
-  * DoD = Depth of Discharge (e.g., "80% DoD" means usable capacity)
-  * SOC = State of Charge, BMS = Battery Management System
-  * EMS = Energy Management System, PCS = Power Conversion System
-  * RTE = Round Trip Efficiency, SCADA = Control protocols
-- **Commercial Terms to Extract**:
-  * Incoterms: EXW, FCA, CPT, CIP, DAP, DPU, DDP, FAS, FOB, CFR, CIF
-  * Delivery terms: "delivered", "turnkey", "supply only", "installation included"
-  * Payment terms: "net 30", "LC at sight", "advance payment", "milestone payments"
-- **Timeline Recognition**:
-  * Quarters: Q1 2025, Q2 2026, etc.
-  * Months: "January 2026", "by March", "end of 2025"
-  * Relative: "6 months", "next year", "ASAP"
-- **Technical Specifications to Extract**:
-  * Efficiency: "85% RTE", "90% efficiency", percentage values
-  * Warranty: "20 years", "80% retention", "performance guarantee"
-  * Response time: "sub-second", "<1s", milliseconds, seconds
-  * Temperature: "-20°C to +50°C", "operating range", temperature values
-  * Certifications: "IEC", "UL", "CE", "IEEE", specific standards
-- **Common Applications**: 
-  * Frequency Regulation: 0.25-1 hour (1-4C), typically 100-365 cycles/day
-  * Energy Arbitrage: 2-4 hours (0.25-0.5C), typically 1-2 cycles/day 
-  * Peak Shaving: 2-6 hours (0.17-0.5C), typically 1-2 cycles/day
-  * Backup Power: 4-8+ hours (0.125-0.25C), typically <1 cycle/day
-`
-    }
-  ]);
+  const [messages, setMessages] = useState([]); // Start with empty messages - Assistant API manages conversation
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  
+  // OpenAI Assistant configuration
+  const ASSISTANT_ID = import.meta.env.VITE_OPENAI_ASSISTANT_ID || 'asst_gkRgQtlA0WWreiRl3y6acyGC';
+  const [threadId, setThreadId] = useState(null);
 
   // Generate random example prompts for each visit
   const [examplePrompts] = useState(() => {
@@ -89,7 +46,7 @@ CRITICAL BESS KNOWLEDGE:
     await processMessage(input, messages);
   };
 
-  // Helper function to process messages (can be called programmatically)
+  // Helper function to process messages using OpenAI Assistant API
   const processMessage = async (messageContent, currentMessages) => {
     setLoading(true);
     let newMessages;
@@ -103,31 +60,46 @@ CRITICAL BESS KNOWLEDGE:
         onChatUpdate(newMessages);
       }
       
-      // Use the new API service
-      const result = await apiService.processChatMessage(newMessages, extractedInfo, sessionId);
+      // Use Assistant API through our backend
+      const result = await apiService.processChatMessage(
+        newMessages, 
+        extractedInfo, 
+        sessionId,
+        ASSISTANT_ID,
+        threadId
+      );
       
       if (result.success) {
-        const displayMessage = result.data.reply; // Now correctly extracting from data.reply
-        setMessages([...newMessages, { role: 'assistant', content: displayMessage }]);
+        const displayMessage = result.data.reply;
+        const finalMessages = [...newMessages, { role: 'assistant', content: displayMessage }];
+        setMessages(finalMessages);
         
-        // Extract form data if provided in the response
-        if (result.data.extractedInfo && onInterestDetected) {
+        // Store thread ID for conversation continuity
+        if (result.data.threadId) {
+          setThreadId(result.data.threadId);
+        }
+        
+        // Extract BESS project data from the response
+        if (result.data.extractedInfo && onExtractInfo) {
+          console.log('📋 Extracted BESS data:', result.data.extractedInfo);
           setExtractedInfo(result.data.extractedInfo);
-          onInterestDetected(result.data.extractedInfo);
+          onExtractInfo(result.data.extractedInfo);
         }
         
         // Notify parent about final chat update
         if (onChatUpdate) {
-          onChatUpdate([...newMessages, { role: 'assistant', content: displayMessage }]);
+          onChatUpdate(finalMessages);
         }
       } else {
         const errorMessage = result.fallback || result.error || 'Sorry, I encountered an error. Please try again.';
-        setMessages([...newMessages, { role: 'assistant', content: errorMessage }]);
+        const finalMessages = [...newMessages, { role: 'assistant', content: errorMessage }];
+        setMessages(finalMessages);
       }
     } catch (error) {
       console.error('Error:', error);
       const fallbackMessage = 'Sorry, I encountered an error. Please try again.';
-      setMessages([...newMessages, { role: 'assistant', content: fallbackMessage }]);
+      const finalMessages = [...newMessages, { role: 'assistant', content: fallbackMessage }];
+      setMessages(finalMessages);
     } finally {
       setLoading(false);
     }
@@ -169,7 +141,7 @@ CRITICAL BESS KNOWLEDGE:
   }, [messages]);
 
   // Calculate dynamic height based on content like ChatGPT
-  const visibleMessages = messages.filter(m => m.role !== 'system');
+  const visibleMessages = messages; // No system messages with Assistant API
   const messageCount = visibleMessages.length;
   
   // Calculate approximate content height more naturally
@@ -325,7 +297,7 @@ CRITICAL BESS KNOWLEDGE:
         ) : (
           // Chat messages with Railway-style bubbles
           <>
-            {messages.filter(m => m.role !== 'system').map((msg, idx) => (
+            {messages.map((msg, idx) => (
               <div key={idx} style={{
                 display: 'flex',
                 justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',

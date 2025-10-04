@@ -68,20 +68,54 @@ export const apiService = {
     }
   },
 
-  // Complete chat interaction with data persistence
-  async processChatMessage(messages, extractedInfo, sessionId) {
+  // Complete chat interaction using OpenAI Assistant API
+  async processChatMessage(messages, extractedInfo, sessionId, assistantId, threadId) {
     try {
-      // Send message to OpenAI
-      const chatResult = await openaiService.sendChatMessage(messages, extractedInfo)
+      console.log('🤖 Processing message with Assistant API:', assistantId);
       
-      if (!chatResult.success) {
-        return chatResult
+      // Get the user's message (last message in array)
+      const userMessage = messages[messages.length - 1];
+      if (!userMessage || userMessage.role !== 'user') {
+        throw new Error('No user message found');
       }
 
-      // Extract the actual message content from the nested response
-      const fullResponse = chatResult.data?.data || chatResult.data;
+      // Determine API URL
+      let apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
       
+      // For Netlify deployments, use Railway
+      if (typeof window !== 'undefined' && 
+          (window.location.hostname.includes('netlify.app') || 
+           window.location.hostname.includes('extraordinary-monstera-e00408'))) {
+        apiUrl = 'https://bess-chat-api-production.up.railway.app';
+      }
+
+      // Call our backend API which handles the Assistant API
+      const response = await fetch(`${apiUrl}/api/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: messages,
+          extractedInfo: extractedInfo,
+          assistantId: assistantId,
+          threadId: threadId,
+          sessionId: sessionId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Backend API error: ${response.status} ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Assistant API call failed');
+      }
+
       // Parse the response to separate visible text from hidden JSON
+      const fullResponse = result.data || result.message || '';
       let messageContent = fullResponse;
       let extractedFormData = null;
       
@@ -100,50 +134,47 @@ export const apiService = {
         }
       }
       
-      // Store thread ID if provided (for Assistant API continuity)
-      if (chatResult.data?.threadId) {
-        window.openaiThreadId = chatResult.data.threadId;
-        console.log('🧵 Stored thread ID for future use:', chatResult.data.threadId);
-      }
-      
-      // Return the processed result with just the message content
+      // Return the processed result
       const processedResult = {
         success: true,
         data: {
           reply: messageContent, // Only the visible text, JSON hidden
-          extractedInfo: extractedFormData // Parsed form data for the cards
+          extractedInfo: extractedFormData, // Parsed form data for the cards
+          threadId: result.threadId // Thread ID for conversation continuity
         }
       };
 
-      // If we have extracted info, save to Supabase
-      if (extractedInfo && Object.keys(extractedInfo).length > 0) {
-        const userIP = await this.getUserIP()
+      // If we have extracted info, save to database
+      if (extractedFormData && Object.keys(extractedFormData).length > 0) {
+        const userIP = await this.getUserIP();
         
         const projectData = {
           session_id: sessionId,
-          ...extractedInfo,
-          form_data: extractedInfo,
+          ...extractedFormData,
+          form_data: extractedFormData,
           chat_messages: messages,
           user_ip: userIP
-        }
+        };
 
-        const saveResult = await supabaseService.saveProject(projectData)
-        
-        if (saveResult.success) {
-          console.log('Project data saved successfully')
-        } else {
-          console.warn('Failed to save project data:', saveResult.error)
+        // Save to Supabase (non-blocking)
+        try {
+          const saveResult = await supabaseService.saveProject(projectData);
+          if (saveResult.success) {
+            console.log('📊 Project data saved to Supabase');
+          }
+        } catch (saveError) {
+          console.warn('Failed to save to Supabase:', saveError);
         }
       }
 
-      return processedResult
+      return processedResult;
     } catch (error) {
-      console.error('Error processing chat message:', error)
+      console.error('❌ Error processing chat message:', error);
       return { 
         success: false, 
         error: error.message,
         fallback: "I'm experiencing technical difficulties. Please try again."
-      }
+      };
     }
   },
 

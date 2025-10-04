@@ -13,9 +13,12 @@ const FloatingProjectCards = ({
     dischargeDuration: { value: '', unit: 'hours', required: true, valid: false },
     dailyCycles: { value: '', unit: 'cycles/day', required: true, valid: false },
     application: { value: '', unit: '', required: true, valid: false },
-    deliveryDate: { value: '', unit: '', required: false, valid: true },
+    deliverySchedule: { value: '', unit: '', required: false, valid: true },
+    incoterms: { value: '', unit: '', required: false, valid: true },
     gridCode: { value: '', unit: '', required: false, valid: true },
-    chemistry: { value: '', unit: '', required: false, valid: true }
+    chemistry: { value: '', unit: '', required: false, valid: true },
+    configuration: { value: '', unit: '', required: false, valid: true },
+    efficiency: { value: '', unit: '%', required: false, valid: true }
   });
 
   const [validationErrors, setValidationErrors] = useState({});
@@ -25,37 +28,52 @@ const FloatingProjectCards = ({
     if (extractedInfo) {
       const updatedCards = { ...cards };
       
-      if (extractedInfo.nominal_power_mw) {
-        updatedCards.nominalPower.value = extractedInfo.nominal_power_mw;
+      // Handle all possible BESS project parameters from the Assistant
+      if (extractedInfo.nominal_power_mw || extractedInfo.power_rating_mw) {
+        updatedCards.nominalPower.value = extractedInfo.nominal_power_mw || extractedInfo.power_rating_mw;
         updatedCards.nominalPower.valid = true;
       }
-      if (extractedInfo.nominal_energy_mwh) {
-        updatedCards.nominalEnergy.value = extractedInfo.nominal_energy_mwh;
+      if (extractedInfo.nominal_energy_mwh || extractedInfo.energy_capacity_mwh) {
+        updatedCards.nominalEnergy.value = extractedInfo.nominal_energy_mwh || extractedInfo.energy_capacity_mwh;
         updatedCards.nominalEnergy.valid = true;
       }
-      if (extractedInfo.discharge_duration_h) {
-        updatedCards.dischargeDuration.value = extractedInfo.discharge_duration_h;
+      if (extractedInfo.discharge_duration_h || extractedInfo.duration_hours) {
+        updatedCards.dischargeDuration.value = extractedInfo.discharge_duration_h || extractedInfo.duration_hours;
         updatedCards.dischargeDuration.valid = true;
       }
-      if (extractedInfo.expected_daily_cycles) {
-        updatedCards.dailyCycles.value = extractedInfo.expected_daily_cycles;
-        updatedCards.dailyCycles.valid = validateDailyCycles(extractedInfo.expected_daily_cycles);
+      if (extractedInfo.expected_daily_cycles || extractedInfo.daily_cycles) {
+        const cycles = extractedInfo.expected_daily_cycles || extractedInfo.daily_cycles;
+        updatedCards.dailyCycles.value = cycles;
+        updatedCards.dailyCycles.valid = validateDailyCycles(cycles);
       }
-      if (extractedInfo.application) {
-        updatedCards.application.value = extractedInfo.application;
+      if (extractedInfo.application || extractedInfo.use_case) {
+        updatedCards.application.value = extractedInfo.application || extractedInfo.use_case;
         updatedCards.application.valid = true;
       }
-      if (extractedInfo.delivery_date) {
-        updatedCards.deliveryDate.value = extractedInfo.delivery_date;
-        updatedCards.deliveryDate.valid = true;
+      if (extractedInfo.delivery_schedule || extractedInfo.delivery_date || extractedInfo.timeline) {
+        updatedCards.deliverySchedule.value = extractedInfo.delivery_schedule || extractedInfo.delivery_date || extractedInfo.timeline;
+        updatedCards.deliverySchedule.valid = true;
       }
-      if (extractedInfo.grid_code_compliance) {
-        updatedCards.gridCode.value = extractedInfo.grid_code_compliance;
+      if (extractedInfo.incoterms || extractedInfo.shipping_terms) {
+        updatedCards.incoterms.value = extractedInfo.incoterms || extractedInfo.shipping_terms;
+        updatedCards.incoterms.valid = true;
+      }
+      if (extractedInfo.grid_code_compliance || extractedInfo.grid_code) {
+        updatedCards.gridCode.value = extractedInfo.grid_code_compliance || extractedInfo.grid_code;
         updatedCards.gridCode.valid = true;
       }
-      if (extractedInfo.chemistry_preference) {
-        updatedCards.chemistry.value = extractedInfo.chemistry_preference;
+      if (extractedInfo.chemistry_preference || extractedInfo.battery_chemistry) {
+        updatedCards.chemistry.value = extractedInfo.chemistry_preference || extractedInfo.battery_chemistry;
         updatedCards.chemistry.valid = true;
+      }
+      if (extractedInfo.configuration || extractedInfo.system_configuration) {
+        updatedCards.configuration.value = extractedInfo.configuration || extractedInfo.system_configuration;
+        updatedCards.configuration.valid = true;
+      }
+      if (extractedInfo.efficiency || extractedInfo.system_efficiency) {
+        const eff = extractedInfo.efficiency || extractedInfo.system_efficiency;
+        updatedCards.efficiency.value = typeof eff === 'string' ? eff.replace('%', '') : eff;
+        updatedCards.efficiency.valid = true;
       }
       
       setCards(updatedCards);
@@ -67,9 +85,12 @@ const FloatingProjectCards = ({
         discharge_duration_h: parseFloat(updatedCards.dischargeDuration.value) || 0,
         expected_daily_cycles: parseFloat(updatedCards.dailyCycles.value) || 0,
         application: updatedCards.application.value,
-        delivery_date: updatedCards.deliveryDate.value,
+        delivery_schedule: updatedCards.deliverySchedule.value,
+        incoterms: updatedCards.incoterms.value,
         grid_code_compliance: updatedCards.gridCode.value,
-        chemistry_preference: updatedCards.chemistry.value
+        chemistry_preference: updatedCards.chemistry.value,
+        configuration: updatedCards.configuration.value,
+        efficiency: parseFloat(updatedCards.efficiency.value) || 0
       };
       
       onDataUpdate(projectUpdate);
@@ -120,9 +141,12 @@ const FloatingProjectCards = ({
       discharge_duration_h: parseFloat(updatedCards.dischargeDuration.value) || 0,
       expected_daily_cycles: parseFloat(updatedCards.dailyCycles.value) || 0,
       application: updatedCards.application.value,
-      delivery_date: updatedCards.deliveryDate.value,
+      delivery_schedule: updatedCards.deliverySchedule.value,
+      incoterms: updatedCards.incoterms.value,
       grid_code_compliance: updatedCards.gridCode.value,
-      chemistry_preference: updatedCards.chemistry.value
+      chemistry_preference: updatedCards.chemistry.value,
+      configuration: updatedCards.configuration.value,
+      efficiency: parseFloat(updatedCards.efficiency.value) || 0
     };
     
     onDataUpdate(projectUpdate);
@@ -304,10 +328,17 @@ const FloatingProjectCards = ({
         />
         
         <CardComponent
-          cardKey="deliveryDate"
-          card={cards.deliveryDate}
-          title="Delivery Date"
+          cardKey="deliverySchedule"
+          card={cards.deliverySchedule}
+          title="Delivery Schedule"
           placeholder="e.g., Q2 2024"
+        />
+        
+        <CardComponent
+          cardKey="incoterms"
+          card={cards.incoterms}
+          title="Incoterms"
+          placeholder="e.g., DDP"
         />
         
         <CardComponent
@@ -322,6 +353,20 @@ const FloatingProjectCards = ({
           card={cards.chemistry}
           title="Battery Chemistry"
           placeholder="e.g., LiFePO4"
+        />
+        
+        <CardComponent
+          cardKey="configuration"
+          card={cards.configuration}
+          title="Configuration"
+          placeholder="e.g., Centralized"
+        />
+        
+        <CardComponent
+          cardKey="efficiency"
+          card={cards.efficiency}
+          title="Efficiency"
+          placeholder="e.g., 95"
         />
       </div>
 
