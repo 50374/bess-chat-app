@@ -8,13 +8,16 @@ const FloatingProjectCards = ({
   isOptimizeEnabled
 }) => {
   const [cards, setCards] = useState({
+    // Required fields for optimization (6 essential fields)
     nominalPower: { value: '', unit: 'MW', required: true, valid: false },
     nominalEnergy: { value: '', unit: 'MWh', required: true, valid: false },
-    dischargeDuration: { value: '', unit: 'hours', required: true, valid: false },
     dailyCycles: { value: '', unit: 'cycles/day', required: true, valid: false },
+    incoterms: { value: '', unit: '', required: true, valid: false },
+    deliverySchedule: { value: '', unit: '', required: true, valid: false },
     application: { value: '', unit: '', required: true, valid: false },
-    deliverySchedule: { value: '', unit: '', required: false, valid: true },
-    incoterms: { value: '', unit: '', required: false, valid: true },
+    
+    // Optional fields (nice to have)
+    dischargeDuration: { value: '', unit: 'hours', required: false, valid: true },
     gridCode: { value: '', unit: '', required: false, valid: true },
     chemistry: { value: '', unit: '', required: false, valid: true },
     configuration: { value: '', unit: '', required: false, valid: true },
@@ -124,6 +127,12 @@ const FloatingProjectCards = ({
         break;
       case 'dailyCycles':
         updatedCards[cardKey].valid = validateDailyCycles(newValue);
+        break;
+      case 'incoterms':
+        updatedCards[cardKey].valid = newValue.trim().length > 0;
+        break;
+      case 'deliverySchedule':
+        updatedCards[cardKey].valid = newValue.trim().length > 0;
         break;
       case 'application':
         updatedCards[cardKey].valid = newValue.trim().length > 0;
@@ -282,7 +291,7 @@ const FloatingProjectCards = ({
           color: 'rgba(255, 255, 255, 0.7)',
           fontSize: '12px'
         }}>
-          Complete required fields to enable optimization
+          Complete 6 required fields to enable optimization
         </div>
       </div>
 
@@ -292,53 +301,55 @@ const FloatingProjectCards = ({
         overflowY: 'auto',
         paddingRight: '8px'
       }}>
+        {/* Required Fields - Only 5 needed for optimization */}
         <CardComponent
           cardKey="nominalPower"
           card={cards.nominalPower}
-          title="Nominal Power"
+          title="⚡ Power Rating"
           placeholder="e.g., 10"
         />
         
         <CardComponent
           cardKey="nominalEnergy"
           card={cards.nominalEnergy}
-          title="Nominal Energy"
+          title="🔋 Energy Capacity"
           placeholder="e.g., 40"
-        />
-        
-        <CardComponent
-          cardKey="dischargeDuration"
-          card={cards.dischargeDuration}
-          title="Discharge Duration"
-          placeholder="e.g., 4"
         />
         
         <CardComponent
           cardKey="dailyCycles"
           card={cards.dailyCycles}
-          title="Daily Cycles"
+          title="🔄 Daily Cycles"
           placeholder="e.g., 1.5"
-        />
-        
-        <CardComponent
-          cardKey="application"
-          card={cards.application}
-          title="Application"
-          placeholder="e.g., Peak Shaving"
-        />
-        
-        <CardComponent
-          cardKey="deliverySchedule"
-          card={cards.deliverySchedule}
-          title="Delivery Schedule"
-          placeholder="e.g., Q2 2024"
         />
         
         <CardComponent
           cardKey="incoterms"
           card={cards.incoterms}
-          title="Incoterms"
+          title="🚚 Incoterms"
           placeholder="e.g., DDP"
+        />
+        
+        <CardComponent
+          cardKey="deliverySchedule"
+          card={cards.deliverySchedule}
+          title="📅 Delivery Schedule"
+          placeholder="e.g., Q2 2024"
+        />
+        
+        <CardComponent
+          cardKey="application"
+          card={cards.application}
+          title="🎯 Application"
+          placeholder="e.g., Peak Shaving"
+        />
+        
+        {/* Optional Fields - Nice to have */}
+        <CardComponent
+          cardKey="dischargeDuration"
+          card={cards.dischargeDuration}
+          title="Duration (Optional)"
+          placeholder="e.g., 4"
         />
         
         <CardComponent
@@ -392,7 +403,7 @@ const FloatingProjectCards = ({
             : 'none'
         }}
       >
-        {isOptimizeEnabled ? '🚀 Optimize BESS Selection' : '⏳ Complete Required Fields'}
+        {isOptimizeEnabled ? '🚀 Optimize BESS Selection' : '⏳ Complete 6 Required Fields'}
       </button>
     </div>
   );

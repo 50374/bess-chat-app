@@ -59,17 +59,34 @@ function App() {
     setProjectData(prev => ({ ...prev, ...info }));
   };
 
-  // Validate project data and enable optimize button
+  // Validate project data and enable optimize button - 6 essential fields required
   const validateProjectData = (data) => {
-    const required = ['nominal_power_mw', 'nominal_energy_mwh', 'discharge_duration_h', 'expected_daily_cycles'];
-    const hasAllRequired = required.every(field => data[field] && data[field] > 0);
+    const required = [
+      'nominal_power_mw',    // Power
+      'nominal_energy_mwh',  // Capacity 
+      'expected_daily_cycles', // Daily cycles
+      'incoterms',           // Incoterms
+      'delivery_schedule',   // Delivery time
+      'application'          // Application
+    ];
+    
+    // Check numeric fields
+    const hasNumericFields = data.nominal_power_mw > 0 && 
+                            data.nominal_energy_mwh > 0 && 
+                            data.expected_daily_cycles > 0;
+    
+    // Check string fields
+    const hasStringFields = data.incoterms && data.incoterms.trim() !== '' &&
+                           data.delivery_schedule && data.delivery_schedule.trim() !== '' &&
+                           data.application && data.application.trim() !== '';
     
     // Logic consistency check: cycles per day should be reasonable
     const dailyCycles = data.expected_daily_cycles;
     const isLogicalCycles = dailyCycles && dailyCycles >= 0.1 && dailyCycles <= 10;
     
-    setIsOptimizeEnabled(hasAllRequired && isLogicalCycles);
-    return hasAllRequired && isLogicalCycles;
+    const isValid = hasNumericFields && hasStringFields && isLogicalCycles;
+    setIsOptimizeEnabled(isValid);
+    return isValid;
   };
 
   // Handle project data updates from floating cards
