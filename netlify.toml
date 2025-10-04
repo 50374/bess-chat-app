@@ -13,6 +13,7 @@
 # Deploy the development branch to a branch deploy
 [context.development]
   command = "npm run build"
+  publish = "dist"
 
 # Deploy previews for pull requests
 [context.deploy-preview]
@@ -21,15 +22,6 @@
 # Branch deploys - automatically deploy specific branches
 [[branch-deploy]]
   branch = "development"
-
-# Force deploy for development branch
-[context."branch-deploy"]
-  command = "npm run build"
-  
-# Specific development context
-[context.development]
-  command = "npm run build"
-  publish = "dist"
   
 # Redirect rules
 [[redirects]]
